@@ -23,7 +23,8 @@
 - SSH 命令：ssh -i "d:\Qoder-work\.qoder\openclaw.pem" root@47.116.125.182
 
 ## 开发环境
-- Windows 环境，本地工作目录：d:\Qoder-work\
+- 当前电脑：家里电脑，Windows 环境，本地工作目录：d:\Qoder-work\
+- 公司电脑：也有开发环境（OpenClaw/小图 之前在公司电脑上开发）
 - GitHub SSH 密钥：~/.ssh/id_ed25519（ed25519，已添加到 GitHub）
 - 服务器 SSH 密钥：d:\Qoder-work\.qoder\openclaw.pem
 - 完整项目在服务器 /opt/eve-esi，本地通过 SCP 上传修改的文件
