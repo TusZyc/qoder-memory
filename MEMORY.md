@@ -14,10 +14,12 @@
 - 状态：约 70% 完成，由 Qoder 接替 OpenClaw 继续开发
 
 ## 服务器信息
-- 阿里云 ECS：47.116.211.186
+- 阿里云 ECS（OpenClaw）：47.116.211.186
+- 阿里云 ECS（Qoder 专属）：47.116.125.182
 - 操作系统：Ubuntu 24.04
 - SSH 用户：root
 - 项目目录：/opt/eve-esi
+- Docker Compose 部署：app(php-fpm) + nginx + redis
 
 ## 开发环境
 - 公司电脑：Windows + WSL，SSH 密钥已配置（ed25519）
