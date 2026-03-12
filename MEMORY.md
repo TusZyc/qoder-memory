@@ -22,8 +22,8 @@
 - Docker 容器：eve-esi-app (php-fpm), eve-esi-nginx, eve-esi-redis
 
 ## 开发环境
-- 公司电脑：Windows + WSL，SSH 密钥已配置（qoder_server.pem）
-- 家里电脑：Windows + WSL，SSH 密钥已配置（ed25519）
+- 公司电脑（当前）：Windows + WSL，SSH 密钥已配置（qoder_server.pem, ed25519）
+- 家里电脑：待配置（需要生成 SSH 密钥并添加到 GitHub 和服务器）
 - 本地工作目录：d:\Qoder-work\eve-esi（仅部分文件，完整项目在服务器 /opt/eve-esi）
 
 ## 部署注意事项
