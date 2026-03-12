@@ -20,8 +20,8 @@
 - 项目目录：/opt/eve-esi
 
 ## 开发环境
-- 家里电脑：Windows + WSL，SSH 密钥已配置（ed25519）
-- 公司电脑：待配置（需要同样生成 SSH 密钥并添加到 GitHub）
+- 公司电脑：Windows + WSL，SSH 密钥已配置（ed25519）
+- 家里电脑：待配置（需要同样生成 SSH 密钥并添加到 GitHub）
 
 ## 偏好
 - 使用中文交流
