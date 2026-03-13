@@ -87,7 +87,7 @@
 - Controller 添加角色 ID 归属验证
 
 ### 7. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
-- **视频背景**（第四次会话）：eve.webm 全屏视频背景 + bg-black/55 遮罩层确保文字可读
+- **视频背景**（第四次会话）：eve-esi-bg.webm (19MB) 全屏视频背景 + bg-black/55 遮罩层确保文字可读
 - **可读性优化**（第四次会话）：卡片改用 bg-black/40 backdrop-blur-lg，标签文字透明度全面提升
 - 实时服务器状态：晨曦(Serenity)/曙光(Infinity)/欧服(Tranquility) 三卡片
   - 显示：在线状态灯、在线人数、启动时间、版本号
