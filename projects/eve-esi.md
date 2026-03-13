@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-13**
+**最后更新：2026-03-13（第三次会话）**
 
 ## 已完成功能
 
@@ -19,9 +19,19 @@
 - 导航栏紧凑布局（图标导航）
 
 ### 3. 技能队列页面（100%）
-- 服务端渲染，技能中文名（本地数据 + API 兜底）
+- **异步加载架构**（2026-03-13 重构）：SkillController 仅返回视图壳，数据由 SkillDataController API 异步加载
+- **API 端点**：
+  - `GET /api/dashboard/skills/overview` — 总SP、未分配SP、训练剩余时间
+  - `GET /api/dashboard/skills/queue` — 技能队列（带名称）
+  - `GET /api/dashboard/skills/groups` — 所有技能按分组（含未学习）
+- **全量技能显示**（2026-03-13）：
+  - 从 ESI /universe/categories/16/ 获取全部 25 个技能分组
+  - 每个分组从 /universe/groups/{id}/ 获取所有技能 type_ids（共 673 个）
+  - 已学技能显示等级和蓝色进度条，未学技能灰色半透明 + "未学习" 标签
+  - 分组标签显示 "已学/总数"（如 43/123），全学满显绿色
+  - 缓存：eve_skill_category_groups (24h), eve_skillgroup_full_{id} (24h), skills_{char_id} (5min)
 - 训练中/等待中/已完成三种状态 + 进度条
-- 已学技能列表（按分组展示）
+- 技能队列默认显示前 5 个，可展开/折叠
 - 60 秒自动刷新
 
 ### 4. 资产页面（100%）
@@ -76,10 +86,25 @@
 - 前端用 textContent/createElement 替代 innerHTML（防 XSS）
 - Controller 添加角色 ID 归属验证
 
-### 7. API 端点
+### 7. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
+- 全新沉浸式首页，CSS 星空动画背景（三层星星粒子 + 星云浮动 + 流星效果）
+- `#bg-container` 预留 `<video>` 标签位置，未来可替换为 webm 视频背景
+- 实时服务器状态：晨曦(Serenity)/曙光(Infinity)/欧服(Tranquility) 三卡片
+  - 显示：在线状态灯、在线人数、启动时间、版本号
+  - ServerStatusController 公开 API 代理三个 ESI 端点，5 分钟缓存
+- 两个入口按钮：
+  - "无授权使用" → 弹出"功能开发中"模态框
+  - "授权使用" → 跳转 /auth/guide
+- 已登录用户自动跳转 /dashboard
+
+### 8. API 端点
+- GET /api/public/server-status（公开，无需认证）
 - GET /api/dashboard/server-status
 - GET /api/dashboard/skills
 - GET /api/dashboard/skill-queue
+- GET /api/dashboard/skills/overview
+- GET /api/dashboard/skills/queue
+- GET /api/dashboard/skills/groups
 - GET /api/dashboard/assets/locations
 - GET /api/dashboard/assets/location/{locationId}
 - GET /api/dashboard/assets/search?q=关键词
@@ -93,9 +118,10 @@
 |--------|------|------|
 | 高 | 钱包查询页面 | 路由和 Controller 方法存在，缺视图 |
 | 高 | 资产估值（价格数据） | API 框架完成，缺价格数据 |
+| 中 | 无授权使用功能页面 | 首页入口已有，页面未开发 |
 | 中 | 市场订单页面 | 无代码 |
 | 中 | 军团管理页面 | 无代码 |
-| 低 | 技能按游戏内分类展示 | 骨架存在，分组逻辑未实现 |
+| 低 | 技能按游戏内分类展示 | 已完成（2026-03-13） |
 | 低 | 击杀记录 | 无代码 |
 | 低 | 合同查询 | 无代码 |
 | 低 | 数据可视化 | 无代码 |
@@ -109,9 +135,12 @@
 ## 关键文件
 - 路由：routes/web.php
 - 认证：app/Http/Controllers/AuthController.php
+- 首页：resources/views/welcome.blade.php
 - 仪表盘：app/Http/Controllers/DashboardController.php + resources/views/dashboard.blade.php
 - API 数据：app/Http/Controllers/Api/DashboardDataController.php
-- 技能：app/Http/Controllers/SkillController.php + resources/views/skills/index.blade.php
+- 服务器状态 API：app/Http/Controllers/Api/ServerStatusController.php
+- 技能 API：app/Http/Controllers/Api/SkillDataController.php
+- 技能页面：app/Http/Controllers/SkillController.php + resources/views/skills/index.blade.php
 - 资产：app/Http/Controllers/Api/AssetDataController.php + resources/views/assets/index.blade.php
 - 数据服务：app/Services/EveDataService.php + app/Helpers/EveHelper.php
 - 数据更新脚本：scripts/update_evedata.py
