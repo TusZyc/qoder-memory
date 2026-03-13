@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-13（第四次会话）**
+**最后更新：2026-03-14**
 
 ## 已完成功能
 
@@ -99,7 +99,31 @@
   - 首页不再自动跳转，已登录用户也能正常访问首页
   - AuthController::guide 检测已授权用户直接跳转 /dashboard
 
-### 8. API 端点
+### 8. KM 查询页面（100% - 2026-03-14）
+- **数据源**：beta.ceve-market.org REST API（protobuf 响应）
+- **自定义 Protobuf 解码器**：
+  - pbDecodeVarint / pbParseMessage / pbGetVarint / pbGetString / pbGetDouble
+  - 解析 wire type 0 (varint), 1 (double), 2 (length-delimited), 5 (32-bit)
+- **击杀列表**：
+  - Beta KB `/app/list/pilot/{id}/kill` → 50 条记录/页
+  - 字段映射：F1=kill_id, F2=victim, F8=ship, F9=time, F10=system, F13=ISK, F16=hash
+  - 旧 KB HTML 解析作为备用
+- **ESI Hash 提取**：
+  - Beta KB `/app/kill/{id}/info` → 正则提取 40 字符十六进制 hash
+  - Hash 缓存 86400s TTL
+- **KM 详情**：ESI `/killmails/{id}/{hash}/` 获取完整击杀数据
+- **前端**：
+  - 击杀列表从后端 API 获取，显示 ISK 值（黄色）
+  - ESI hash 预加载到 data-hash 属性，点击即时加载详情
+  - 支持按角色名搜索（POST /universe/ids/ 获取 character_id）
+  - 支持直接输入 Kill ID 查询
+
+### 9. 导航统一（2026-03-14）
+- 全部 6 个页面右上角统一 5 图标导航栏：🏠📚📦👥⚔️
+- 当前页面图标 bg-white/10 高亮
+- 涉及页面：dashboard, skills, assets, characters/index, characters/show, killmails
+
+### 10. API 端点
 - GET /api/public/server-status（公开，无需认证）
 - GET /api/dashboard/server-status
 - GET /api/dashboard/skills
@@ -113,6 +137,10 @@
 - GET /api/dashboard/character-info
 - GET /api/dashboard/character-location
 - GET /api/dashboard/character-online
+- GET /api/killmails/search?character_name=xxx
+- GET /api/killmails/{killId}/detail
+- GET /api/killmails/{killId}/hash
+- GET /api/killmails/pilot/{pilotId}/kills
 
 ## 待开发功能
 
@@ -123,15 +151,12 @@
 | 中 | 无授权使用功能页面 | 首页入口已有，页面未开发 |
 | 中 | 市场订单页面 | 无代码 |
 | 中 | 军团管理页面 | 无代码 |
-| 低 | 技能按游戏内分类展示 | 已完成（2026-03-13） |
-| 低 | 击杀记录 | 无代码 |
 | 低 | 合同查询 | 无代码 |
 | 低 | 数据可视化 | 无代码 |
 
 ## 已知问题
 - 前端全部内联在 Blade 模板中，无组件化
 - 技能进度条的 SP 阈值是固定值，不精确（不同技能倍率不同）
-- characters/index.blade.php 视图代码缺失
 - evedata.xlsx 中少量物品翻译可能不准确（如护盾增强器显示舰船属性）
 
 ## 关键文件
@@ -144,6 +169,8 @@
 - 技能 API：app/Http/Controllers/Api/SkillDataController.php
 - 技能页面：app/Http/Controllers/SkillController.php + resources/views/skills/index.blade.php
 - 资产：app/Http/Controllers/Api/AssetDataController.php + resources/views/assets/index.blade.php
+- KM 查询：app/Http/Controllers/Api/KillmailController.php + app/Services/KillmailService.php + resources/views/killmails/index.blade.php
+- 角色：app/Http/Controllers/CharacterController.php + resources/views/characters/index.blade.php + show.blade.php
 - 数据服务：app/Services/EveDataService.php + app/Helpers/EveHelper.php
 - 数据更新脚本：scripts/update_evedata.py
 - 数据更新命令：app/Console/Commands/UpdateEveData.php
