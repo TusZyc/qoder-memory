@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-13（第三次会话）**
+**最后更新：2026-03-13（第四次会话）**
 
 ## 已完成功能
 
@@ -87,15 +87,17 @@
 - Controller 添加角色 ID 归属验证
 
 ### 7. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
-- 全新沉浸式首页，CSS 星空动画背景（三层星星粒子 + 星云浮动 + 流星效果）
-- `#bg-container` 预留 `<video>` 标签位置，未来可替换为 webm 视频背景
+- **视频背景**（第四次会话）：eve.webm 全屏视频背景 + bg-black/55 遮罩层确保文字可读
+- **可读性优化**（第四次会话）：卡片改用 bg-black/40 backdrop-blur-lg，标签文字透明度全面提升
 - 实时服务器状态：晨曦(Serenity)/曙光(Infinity)/欧服(Tranquility) 三卡片
   - 显示：在线状态灯、在线人数、启动时间、版本号
   - ServerStatusController 公开 API 代理三个 ESI 端点，5 分钟缓存
 - 两个入口按钮：
   - "无授权使用" → 弹出"功能开发中"模态框
   - "授权使用" → 跳转 /auth/guide
-- 已登录用户自动跳转 /dashboard
+- **页面跳转逻辑**（第四次会话）：
+  - 首页不再自动跳转，已登录用户也能正常访问首页
+  - AuthController::guide 检测已授权用户直接跳转 /dashboard
 
 ### 8. API 端点
 - GET /api/public/server-status（公开，无需认证）
