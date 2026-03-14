@@ -39,3 +39,32 @@
 - 使用中文交流
 - 项目之前由 OpenClaw（AI 助手名"小图"）开发，现由 Qoder 接替
 - 代码推送到 eve-esi-qoder 仓库，不动原始 eve-esi 仓库
+
+## KM 搜索技术细节
+
+### Beta KB Search API
+- 地址：https://beta.ceve-market.org/app/search/search (POST)
+- 协议：gRPC-web 风格的 protobuf 编码
+- XSRF 保护：需要 ReDive + GranblueFantasy cookies + FinalFantasy-XIV header
+- XSRF cookies 从 beta.ceve-market.org 根路径 `/` 获取（比 `/search` 快 10 倍）
+- Protobuf 字段：F1=Allis, F2=Corps, F3=Chars, F4=chartype, F5=types, F6=groups, F7=systems, F8=regions, F9=startdate, F10=enddate
+- 重要限制：entity(F1-F3) 不能与 types(F5)/systems(F7) 组合使用，会返回空
+- entity + chartype + daterange 可以组合
+- chartype 映射：victim→lost, finalblow→win, attacker→atk
+
+### Beta KB List API
+- 地址：https://beta.ceve-market.org/app/list/{type}/{id}/{kill|loss}
+- URL 路径映射：pilot→pilot, corporation→corp, alliance→alli
+- 不需要 XSRF cookies，直接 GET
+- 返回 protobuf 格式，需检测 HTML 响应 (ord($body[0]) === 0x3C)
+
+### 建筑/Structure 处理
+- ESI category 65 = Structures
+- 常见建筑：Astrahus=35833, Fortizar=35834, Keepstar=35835
+- 建筑搜索跳过 chartype 过滤（建筑 KM 一般都是被摧毁）
+- isStructureTypeId() 基于 ESI category 65 的 group type_ids 判断
+
+### beta.ceve-market.org 连接注意事项
+- 该站点从阿里云 ECS Docker 容器访问不稳定，经常超时
+- XSRF cookies 缓存 30 分钟，负缓存 60 秒避免阻塞
+- 重试逻辑：2 次尝试，500ms 间隔
