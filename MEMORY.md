@@ -23,17 +23,31 @@
 - SSH 命令：ssh -i "d:\Qoder-work\.qoder\openclaw.pem" root@47.116.125.182
 
 ## 开发环境
-- 公司电脑（当前）：Windows + WSL，SSH 密钥 qoder_server.pem / ed25519
+- 公司电脑：Windows + WSL，SSH 密钥 qoder_server.pem / ed25519
 - 家里电脑：Windows + WSL，SSH 密钥 openclaw.pem / ed25519，2026-03-12 晚配置完成
 - 本地工作目录：d:\Qoder-work\（仅部分文件，完整项目在服务器 /opt/eve-esi）
 - 完整项目在服务器 /opt/eve-esi，本地通过 SCP 上传修改的文件
 
 ## 部署注意事项
-- PHP 文件通过 SCP 上传到服务器对应路径
+- PHP 文件通过 SCP 上传到服务器 /tmp，再 docker cp 到容器内
 - Docker 服务名是 `app`（不是 php），artisan 命令：docker compose exec -T app php artisan ...
-- 部署后必须清理缓存：php artisan cache:clear / config:clear
-- 部署后重启容器：docker compose restart app
+- 部署后必须清理缓存：php artisan cache:clear / view:clear
 - 历史问题：tarball 方式部署曾导致 PHP $ 变量符号丢失，已改用 SCP 直传
+- git push 后服务器不会自动部署，需手动 SCP + docker cp
+
+## EVE ESI API 经验
+
+### 中文翻译陷阱
+- `universe/stations/{id}/` 不支持 `language=zh`，永远返回英文站名
+- `universe/names/` 批量端点也不支持 language 参数
+- `universe/systems/{id}/?language=zh` 支持中文（可获取中文星系名）
+- NPC 空间站中文名：需逐段翻译（星系名 + "Moon"→"卫星" + 军团名 + 设施类型映射表）
+- 设施类型映射：Assembly Plant→组装工厂, Refinery→精炼厂, Warehouse→仓库 等
+
+### 数据格式
+- EVE 角色描述 `\xNN`：是 Unicode 码点 U+00NN，需 pack('H*','00'.$m[1]) → UCS-2BE → UTF-8
+- EVE 颜色格式：ARGB 8位 (#AARRGGBB)，CSS 需 RGB 6位，需 substr($color,2) 去掉 alpha
+- items.json 原本不含星系数据，已从 ESI 批量导入 8534 个星系中文名
 
 ## 偏好
 - 使用中文交流
