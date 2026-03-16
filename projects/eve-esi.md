@@ -1,13 +1,13 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-15（第七次会话 - 家里电脑）**
+**最后更新：2026-03-16（第六次会话）**
 
 ## 已完成功能
 
 ### 1. OAuth2 认证系统（100%）
 - 3 步授权流程（清除缓存 → 授权 → 填写授权码）
 - EVE 国服 OAuth2，Client ID: bc90aa496a404724a93f41b4f4e97761
-- 3V 完整 73 个权限（含 esi-clones.read_clones.v1 / read_implants.v1）
+- 3V 完整 73 个权限
 - Refresh Token 自动刷新（提前 5 分钟，通过中间件 AutoRefreshEveToken）
 - TokenRefreshService 统一刷新逻辑（解决三处重复问题）
 
@@ -19,75 +19,162 @@
 - 导航栏紧凑布局（图标导航）
 
 ### 3. 技能队列页面（100%）
-- 异步加载架构：SkillController 返回视图壳，SkillDataController API 异步加载
-- API：/api/dashboard/skills/overview, queue, groups
-- 全量技能显示：25 个分组 673 个技能，已学/未学区分（已过滤虚构技能分类）
+- **异步加载架构**（2026-03-13 重构）：SkillController 仅返回视图壳，数据由 SkillDataController API 异步加载
+- **API 端点**：
+  - `GET /api/dashboard/skills/overview` — 总SP、未分配SP、训练剩余时间
+  - `GET /api/dashboard/skills/queue` — 技能队列（带名称）
+  - `GET /api/dashboard/skills/groups` — 所有技能按分组（含未学习）
+- **全量技能显示**（2026-03-13）：
+  - 从 ESI /universe/categories/16/ 获取全部 25 个技能分组
+  - 每个分组从 /universe/groups/{id}/ 获取所有技能 type_ids（共 673 个）
+  - 已学技能显示等级和蓝色进度条，未学技能灰色半透明 + "未学习" 标签
+  - 分组标签显示 "已学/总数"（如 43/123），全学满显绿色
+  - 缓存：eve_skill_category_groups (24h), eve_skillgroup_full_{id} (24h), skills_{char_id} (5min)
 - 训练中/等待中/已完成三种状态 + 进度条
+- 技能队列默认显示前 5 个，可展开/折叠
 - 60 秒自动刷新
 
 ### 4. 资产页面（100%）
-- 两步加载架构：先位置列表，再按需加载物品
-- API：/api/dashboard/assets/locations, location/{id}, search
-- 搜索、舰船/物品机库分类、树形展示、位置标志中文映射
-- 并发 HTTP 请求 + 三层缓存
+- **两步加载架构**：先加载位置列表（快速），再按需加载每个位置的物品详情
+- **API 端点**：
+  - `GET /api/dashboard/assets/locations` — 返回位置列表+物品数量
+  - `GET /api/dashboard/assets/location/{locationId}` — 返回某位置的物品树
+  - `GET /api/dashboard/assets/search?q=关键词` — 搜索物品
+- **搜索功能**（2026-03-12）：
+  - 结果按位置分组为可折叠卡片，与正常模式样式一致
+  - 展开位置卡片可查看完整树形物品（调用 loadLocationItems）
+  - 位置名称显示中文（优先读缓存，不再显示为 ID）
+- **舰船/物品机库分类**（2026-03-12）：
+  - 空间站/建筑内物品按 category_id 分为「舰船机库」和「物品机库」两个分组
+  - getGroupNames() 返回 category_id，buildNode() 带入前端
+  - 前端 renderHangarSections() 按 category_id === 6 分组渲染
+- **物品计数修正**（2026-03-12）：
+  - 舰船/集装箱内物品不再重复计算，以容器本身为 1 个单位
+- **三层缓存**：
+  - 原始资产数据 15 分钟（assets_raw_{characterId}）
+  - 每个位置物品树 15 分钟（assets_loc_{characterId}_{locationId}）
+  - 类型详情/分组名称/位置名称各 24 小时
+- **并发 HTTP 请求**：Http::pool() 每批并发查询类型详情和分组名称
+- **中文分组名称**：ESI API 调用添加 language=zh 和 datasource=serenity
+- **前端懒加载**：位置默认折叠，点击展开时加载物品
+- **自动预加载**：单星系用户自动展开星系和最大位置
+- **树形展示**：通过 item_id/location_id 父子关系构建，支持展开/折叠
+- **位置标志中文映射**：机库/货柜仓/无人机仓/高槽/中槽/低槽/改装件等
 
-### 5. 角色信息页面（100% - 2026-03-15）
-- 四标签切换界面：角色描述 / 属性&植入体 / 克隆体 / 雇佣历史
-- **角色描述**：完整 EVE 富文本解码（Python unicode 转义、HTML 实体、\xNN hex 序列→Unicode、ARGB 颜色→CSS RGB）
-- **属性&植入体**：五大属性值 + 当前植入体列表，异步加载
-- **克隆体**：跳跃克隆体位置与植入体，NPC 空间站逐段中文翻译（星系名 + Moon→卫星 + 军团名 + 设施类型映射）
-- **雇佣历史**：军团历史含起止时间与天数统计（格式：start_date ~ end_date (N天)）
-- API：/api/dashboard/character/attributes, implants, clones, corphistory
-- CharacterController 含 resolveLocationName() + translateStationName() 逐段翻译
+### 5. 本地数据服务（100% - 2026-03-13 重构）
+- **数据来源**：ceve-market.org 的 evedata.xlsx（每日更新）
+- **Python 脚本 update_evedata.py**：下载 xlsx，解析 6 张表，生成 JSON 数据文件
+- **数据文件**：
+  - `data/eve_names.json`：43,305 条 ID→中文名称映射（物品28K + 星域109 + 星座1.1K + 星系8.2K + NPC站5.2K + 玩家建筑247）
+  - `data/eve_station_systems.json`：5,464 条站点→星系ID映射
+  - `data/evedata_meta.json`：元数据（更新时间、各类计数）
+- **EveDataService**：
+  - getItemDatabase()：读取 eve_names.json，缓存 2 小时
+  - getStationSystemMap()：读取 eve_station_systems.json，缓存 2 小时
+  - getNameById() / getNamesByIds()：本地优先，ESI API 兜底
+  - updateData()：调用 Python 脚本更新数据
+- **AssetDataController 集成**：
+  - getLocationInfo()：NPC空间站/玩家建筑优先从本地数据查找名称和所属星系
+  - getSolarSystemNames()：星系名称优先从本地数据查找
+  - 仅对本地找不到的实体才回退到 ESI API
+- **自动更新**：每周一凌晨 2:00 cron 执行 eve:update-data（host 级别 crontab）
+- EveHelper：静态门面
 
-### 6. 本地数据服务（100% - 2026-03-15 更新）
-- ceve-market.org evedata.xlsx → Python 脚本 → JSON
-- items.json (~36,800条，含 8,534 个星系中文名从 ESI 批量导入)
-- eve_station_systems.json (5,464条)
-- EveDataService：本地优先，ESI API 兜底
-- 星系中文名支持位置搜索模糊匹配
+### 6. 安全改进（2026-03-12）
+- TokenRefreshService 统一 Token 刷新（消除三处重复）
+- 缓存 key 添加 user_id 前缀（防止碰撞）
+- 前端用 textContent/createElement 替代 innerHTML（防 XSS）
+- Controller 添加角色 ID 归属验证
 
-### 7. 安全改进（2026-03-12）
-- TokenRefreshService 统一刷新、缓存 key 前缀、XSS 防护、角色 ID 验证
+### 7. 市场功能（100% - 2026-03-16 大重构）
+- **MarketController**：公开访问，无需登录，支持游客/已登录两种模式
+- **MarketDataController API 端点**：
+  - `GET /api/public/market/groups` — 市场分组树
+  - `GET /api/public/market/search` — 物品模糊搜索（本地 items.json）
+  - `GET /api/public/market/regions` — 星域列表
+  - `GET /api/public/market/active-types` — 区域内有订单的物品 ID 列表
+  - `GET /api/public/market/orders?region_id=X&type_id=Y` — 市场订单
+  - `GET /api/public/market/history?region_id=X&type_id=Y` — 价格历史
+  - `GET /api/public/market/types/{id}` — 物品详情
+  - `GET /api/market/character-orders`（认证）— 角色订单
+  - `GET /api/market/my-order-ids`（认证）— 角色订单 ID 列表
+- **MarketService**：
+  - ESI API 封装，含分组树构建、订单/历史/物品查询、角色订单
+  - `enrichOrdersWithLocation()`：中文站名翻译（星系名、卫星、军团名、27种设施类型映射）
+  - `enrichOrdersWithExpires()`：计算订单到期时间
+  - `getActiveTypeIds()`：区域内有订单的物品类型
+  - `buildTypeCategoryMap()`：搜索结果分类路径构建
+  - 站名缓存 key：`eve_locinfo_{id}`（与资产页共享）
+- **CacheMarketGroups artisan 命令**：预缓存 2141 个市场分组 + 115 个星域
+- **前端三栏布局**：
+  - 左栏：区域列表（伏尔戈（吉他）默认 + 全部 + 115 星域，中文排前）
+  - 中栏：市场分组树 / 搜索结果（300ms 防抖搜索 + 分类路径显示）
+  - 右栏：物品信息 + 订单表（价格/数量/中文位置/到期时间） + 价格历史图表
+  - 无订单物品灰色半透明 + "仅有订单"过滤复选框
+  - 订单分页（10条/页 + 加载更多/折叠按钮）
+  - "我的订单"标签仅登录用户可见
+- **中文站名翻译**：参考 AssetDataController 模式，6 步翻译流程
+  1. ESI 获取站点详情（名称、star_system_id、owner）
+  2. Http::pool() 并行获取中英文星系名
+  3. /universe/names 获取中英文军团名
+  4. 27 种设施类型英中映射（Assembly Plant → 组装工厂 等）
+  5. 替换：星系名→中文、Moon→卫星、军团名→中文、设施类型→中文
+  6. 缓存到 `eve_locinfo_{id}`（24h TTL，与资产页共享）
 
-### 8. 市场功能（100% - 2026-03-14）
-- **MarketController**：公开访问，支持游客/已登录两种模式
-- **MarketDataController API**：市场分组树、分组详情、市场订单、价格历史、物品详情
-- **MarketService**：ESI API 封装，分组树构建、订单/历史/物品查询
-- **CacheMarketGroups artisan 命令**：预缓存 2141 个市场分组
-- **前端**：分组树浏览 + 订单表 + 价格历史图表
+### 8. 游客仪表盘（100% - 2026-03-14）
+- **GuestDashboardController**：无需授权，显示服务器状态 + 功能预览
+- 路由：`GET /guest`
+- 三服务器状态卡片 + 授权提示 + 功能预览（角色/技能/资产锁定状态）
 
-### 9. 游客仪表盘（100% - 2026-03-14）
-- **GuestDashboardController**：无需授权，GET /guest
-- 三服务器状态卡片 + 授权提示 + 功能预览
+### 9. KM 查询功能（100% - 2026-03-14，家里电脑开发）
+- **KillmailController**（Api 命名空间）：页面渲染 + 搜索/列表/详情 API
+- **KillmailService**：KB API 集成 + Beta KB protobuf 解析 + ESI killmail 详情
+- **API 端点**：
+  - `GET /killmails` — KM 查询页面
+  - `GET /api/killmails/search?q=角色名` — 搜索角色
+  - `GET /api/killmails/pilot/{pilotId}/kills` — 角色 KM 列表
+  - `GET /api/killmails/kill/{killId}?hash=xxx` — KM 详情
+- **前端**：角色搜索 + KM 列表 + 模态框详情，支持 KM ID / KB 链接 / ESI 链接直接查询
+- **ESI hash 获取策略**：前端优先 Beta KB API 提取 hex hash，降级旧 KB HTML，再降级后端
 
-### 10. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
-- 视频背景 eve-esi-bg.webm + 三服务器状态
-- 授权使用/无授权使用入口
+### 10. 共享布局系统（2026-03-16）
+- **layouts/app.blade.php**：认证页面主布局，含 Tailwind CDN、共享样式
+  - `@stack('head-scripts')` / `@stack('styles')` / `@yield('content')` / `@stack('scripts')`
+  - 内容无容器包装，各页面自行添加 `<div class="container">`
+- **layouts/guest.blade.php**：游客页面布局，结构同 app.blade.php
+- **layouts/partials/navbar.blade.php**：共享导航栏
+  - 所有用户：🏠 仪表盘 | 📊 市场 | ⚔️ KM
+  - 仅认证用户：📚 技能 | 📦 资产 | 👥 角色
+  - `$activePage` 高亮当前页，`$isLoggedIn` 控制显示
+- 所有页面已迁移（dashboard、skills、assets、characters、market、killmails、guest-dashboard）
 
-### 11. KM 查询页面（100% - 2026-03-15 更新）
-- **数据源**：beta.ceve-market.org REST API（protobuf 响应）
-- **自定义 Protobuf 解码器**：pbDecodeVarint / pbParseMessage 等
-- **高级搜索**：角色/军团/联盟/舰船/星系多维度搜索
-- **位置搜索**：中文星系名模糊匹配自动补全（本地 items.json + ESI universe/ids 兜底）
-- **舰船搜索**：支持具体舰船和舰船类别自动补全（已去除多余"(类别)"后缀）
-- **时间搜索**：精确到秒（datetime-local step=1），支持仅时间条件搜索
-- **搜索条件**：允许仅位置、仅时间、或任意组合作为搜索条件
-- **KM 详情弹窗**：参与者列表、损失装配、伤害统计（max-w-5xl 居中弹窗）
+### 11. 统一导航栏（2026-03-16 升级）
+- 通过 layouts/partials/navbar.blade.php 共享，不再各页面独立维护
+- 当前页面 `bg-white/10` 高亮
 
-### 12. 统一导航栏（2026-03-14）
-- 认证页面统一 5 图标 + 登出
-- 当前页面 bg-white/10 高亮
-- 市场页面保持独立导航
+### 11. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
+- **视频背景**（第四次会话）：eve-esi-bg.webm (19MB) 全屏视频背景 + bg-black/55 遮罩层确保文字可读
+- **可读性优化**（第四次会话）：卡片改用 bg-black/40 backdrop-blur-lg，标签文字透明度全面提升
+- 实时服务器状态：晨曦(Serenity)/曙光(Infinity)/欧服(Tranquility) 三卡片
+  - 显示：在线状态灯、在线人数、启动时间、版本号
+  - ServerStatusController 公开 API 代理三个 ESI 端点，5 分钟缓存
+- 两个入口按钮：
+  - "无授权使用" → 弹出"功能开发中"模态框
+  - "授权使用" → 跳转 /auth/guide
+- **页面跳转逻辑**（第四次会话）：
+  - 首页不再自动跳转，已登录用户也能正常访问首页
+  - AuthController::guide 检测已授权用户直接跳转 /dashboard
 
-### 13. API 端点
-- **公开**：/api/public/server-status, /api/public/market/*
-- **认证仪表盘**：/api/dashboard/server-status, character-info, character-location, character-online, skills, skill-queue
-- **认证技能**：/api/dashboard/skills/overview, queue, groups
-- **认证资产**：/api/dashboard/assets/locations, location/{id}, search
-- **认证角色**：/api/dashboard/character/attributes, implants, clones, corphistory
-- **认证市场**：/api/market/character-orders, my-order-ids
-- **KM 查询**：/api/killmails/autocomplete, advanced-search
+### 12. API 端点
+- GET /api/public/server-status（公开，无需认证）
+- GET /api/public/market/groups, search, regions, active-types, orders, history, types/{id}（公开市场 API）
+- GET /api/dashboard/server-status
+- GET /api/dashboard/skills, skill-queue
+- GET /api/dashboard/skills/overview, queue, groups
+- GET /api/dashboard/assets/locations, location/{id}, search
+- GET /api/dashboard/character-info, character-location, character-online
+- GET /api/market/character-orders, my-order-ids（认证市场 API）
+- GET /api/killmails/autocomplete, advanced-search, search, pilot/{id}/kills, kill/{id}（KM API）
 
 ## 待开发功能
 
@@ -100,27 +187,29 @@
 | 低 | 数据可视化 | 无代码 |
 
 ## 已知问题
-- 前端全部内联在 Blade 模板中，无组件化（导航栏各页面独立维护）
-- 技能进度条 SP 阈值固定，不精确
-- evedata.xlsx 少量物品翻译可能不准确
+- 技能进度条的 SP 阈值是固定值，不精确（不同技能倍率不同）
+- evedata.xlsx 中少量物品翻译可能不准确（如护盾增强器显示舰船属性）
 
 ## 关键文件
 - 路由：routes/web.php
 - 认证：app/Http/Controllers/AuthController.php
 - 首页：resources/views/welcome.blade.php
+- 布局系统：resources/views/layouts/app.blade.php, guest.blade.php, partials/navbar.blade.php
 - 仪表盘：app/Http/Controllers/DashboardController.php + resources/views/dashboard.blade.php
 - API 数据：app/Http/Controllers/Api/DashboardDataController.php
 - 服务器状态 API：app/Http/Controllers/Api/ServerStatusController.php
 - 技能 API：app/Http/Controllers/Api/SkillDataController.php
 - 技能页面：app/Http/Controllers/SkillController.php + resources/views/skills/index.blade.php
 - 资产：app/Http/Controllers/Api/AssetDataController.php + resources/views/assets/index.blade.php
-- 角色信息：app/Http/Controllers/CharacterController.php + resources/views/characters/index.blade.php
-- 市场：app/Http/Controllers/MarketController.php + Api/MarketDataController.php + MarketService.php
-- KM 查询：app/Http/Controllers/Api/KillmailController.php + KillmailService.php + resources/views/killmails/index.blade.php
+- 市场：app/Http/Controllers/MarketController.php + app/Http/Controllers/Api/MarketDataController.php + app/Services/MarketService.php
+- KM 查询：app/Http/Controllers/Api/KillmailController.php + app/Services/KillmailService.php
 - 游客仪表盘：app/Http/Controllers/GuestDashboardController.php
+- 数据服务：app/Services/EveDataService.php + app/Helpers/EveHelper.php
+- 数据更新脚本：scripts/update_evedata.py
+- 数据更新命令：app/Console/Commands/UpdateEveData.php
 - 市场缓存命令：app/Console/Commands/CacheMarketGroups.php
-- 数据服务：app/Services/EveDataService.php
-- 数据更新：scripts/update_evedata.py + app/Console/Commands/UpdateEveData.php
 - Token 刷新：app/Services/TokenRefreshService.php
-- ESI 配置：config/esi.php（含克隆体/植入体权限）
+- 用户模型：app/Models/User.php
+- Token 中间件：app/Http/Middleware/AutoRefreshEveToken.php
+- ESI 配置：config/esi.php
 - 缓存配置：config/cache.php（文件驱动）
