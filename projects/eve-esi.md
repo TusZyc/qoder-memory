@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-16（第六次会话）**
+**最后更新：2026-03-17（第八次会话 - 家里电脑）**
 
 ## 已完成功能
 
@@ -143,14 +143,10 @@
   - 内容无容器包装，各页面自行添加 `<div class="container">`
 - **layouts/guest.blade.php**：游客页面布局，结构同 app.blade.php
 - **layouts/partials/navbar.blade.php**：共享导航栏
-  - 所有用户：🏠 仪表盘 | 📊 市场 | ⚔️ KM
+  - 所有用户：🏠 仪表盘 | 📊 市场 | ⚔️ KM | 📍 旗舰导航
   - 仅认证用户：📚 技能 | 📦 资产 | 👥 角色
   - `$activePage` 高亮当前页，`$isLoggedIn` 控制显示
-- 所有页面已迁移（dashboard、skills、assets、characters、market、killmails、guest-dashboard）
-
-### 11. 统一导航栏（2026-03-16 升级）
-- 通过 layouts/partials/navbar.blade.php 共享，不再各页面独立维护
-- 当前页面 `bg-white/10` 高亮
+- 所有页面已迁移（dashboard、skills、assets、characters、market、killmails、guest-dashboard、capital-nav）
 
 ### 11. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
 - **视频背景**（第四次会话）：eve-esi-bg.webm (19MB) 全屏视频背景 + bg-black/55 遮罩层确保文字可读
@@ -165,7 +161,22 @@
   - 首页不再自动跳转，已登录用户也能正常访问首页
   - AuthController::guide 检测已授权用户直接跳转 /dashboard
 
-### 12. API 端点
+### 12. 旗舰导航（100% - 2026-03-17）
+- **CapitalNavController**：公开访问，GET /capital-nav
+- **CapitalNavApiController**：4个API端点（autocomplete/distance/reachable/route）
+- **CapitalNavigationService**：核心业务逻辑
+  - 7种舰船类型常量（基础航程+基础燃料）
+  - 27个 Pochven 星系硬编码禁入
+  - calculateJumpRange()：基础航程 * (1 + 0.20 * JDC)
+  - calculateFuelRate()：基础燃料 * (1 - 0.10 * 燃料效率) * JF修正
+  - getReachableSystems()：遍历全部星系过滤距离/安等
+  - bfsJumpRoute()：BFS最少跳数（纯跳跃）
+  - dijkstraHybridRoute()：Dijkstra最少燃料（星门0代价+跳跃燃料代价）
+- **SyncUniverseSystems artisan 命令**：eve:sync-universe，从 ESI 批量同步 5432 个 K-space 星系坐标/安等/星域/星座 → eve_systems_full.json (1.26MB)
+- **前端**：三标签页（星系距离/一跳可达/路线规划），自动补全，客户端跳跃预览
+- **样式**：与 KM 页面一致（bg-white/5 backdrop-blur 卡片风格，select option 深色背景修复）
+
+### 13. API 端点
 - GET /api/public/server-status（公开，无需认证）
 - GET /api/public/market/groups, search, regions, active-types, orders, history, types/{id}（公开市场 API）
 - GET /api/dashboard/server-status
@@ -175,6 +186,8 @@
 - GET /api/dashboard/character-info, character-location, character-online
 - GET /api/market/character-orders, my-order-ids（认证市场 API）
 - GET /api/killmails/autocomplete, advanced-search, search, pilot/{id}/kills, kill/{id}（KM API）
+- GET /api/capital-nav/autocomplete, distance, reachable, route（旗舰导航 API）
+- GET /api/system-distance/path, euclidean, name, batch（星系距离 API）
 
 ## 待开发功能
 
@@ -203,6 +216,8 @@
 - 资产：app/Http/Controllers/Api/AssetDataController.php + resources/views/assets/index.blade.php
 - 市场：app/Http/Controllers/MarketController.php + app/Http/Controllers/Api/MarketDataController.php + app/Services/MarketService.php
 - KM 查询：app/Http/Controllers/Api/KillmailController.php + app/Services/KillmailService.php
+- 旗舰导航：app/Http/Controllers/CapitalNavController.php + Api/CapitalNavApiController.php + CapitalNavigationService.php + resources/views/capital-nav/index.blade.php
+- 星系同步命令：app/Console/Commands/SyncUniverseSystems.php → eve_systems_full.json
 - 游客仪表盘：app/Http/Controllers/GuestDashboardController.php
 - 数据服务：app/Services/EveDataService.php + app/Helpers/EveHelper.php
 - 数据更新脚本：scripts/update_evedata.py

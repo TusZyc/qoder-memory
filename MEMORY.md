@@ -54,6 +54,17 @@
 - 项目之前由 OpenClaw（AI 助手名"小图"）开发，现由 Qoder 接替
 - 代码推送到 eve-esi-qoder 仓库，不动原始 eve-esi 仓库
 
+## 旗舰导航功能（2026-03-17）
+- 三标签页面：星系距离 / 一跳可达 / 路线规划
+- 公开访问（无需认证），导航栏 📍 图标
+- 舰船类型 7 种：战略货舰/长须鲸级/黑隐特勤舰/航母/无畏/超航/泰坦
+- 技能修正：JDC +20%/级跳跃距离，燃料效率 -10%/级，JF -10%/级（仅战略货舰）
+- 距离公式：sqrt((x2-x1)^2+(y2-y1)^2+(z2-z1)^2) / 9.461e15 光年
+- 路线算法：BFS（纯跳跃最少跳数）/ Dijkstra（星门+跳跃最少燃料）
+- 数据源：eve:sync-universe artisan 命令从 ESI 同步 5432 个 K-space 星系到 eve_systems_full.json (1.26MB)
+- 限制：旗舰不能进入高安（>=0.5）和 Pochven（27 个星系硬编码）
+- API 端点：/api/capital-nav/autocomplete, distance, reachable, route（均 throttle:30,1）
+
 ## KM 搜索技术细节
 
 ### Beta KB Search API
