@@ -1,17 +1,21 @@
 # Qoder 长期记忆
 
+**最后更新：2026-03-17**
+
 ## 项目负责人
 - 名称：图斯（Tus）
 - GitHub：TusZyc
 
 ## 活跃项目
 
-### EVE ESI 管理网站
-- 仓库：git@github.com:TusZyc/eve-esi-qoder.git
-- 原始仓库（OpenClaw 开发）：git@github.com:TusZyc/eve-esi.git
-- 技术栈：Laravel 10 + PHP 8.2 + Blade + Tailwind CSS + Alpine.js + SQLite + Redis
-- 部署：Docker Compose → 阿里云 ECS (47.116.125.182)
-- 状态：持续开发中，由 Qoder 接替 OpenClaw 继续开发
+### EVE ESI Tools (eve-esi-qoder)
+- **仓库**: https://github.com/TusZyc/eve-esi-qoder
+- **原始仓库**（OpenClaw 开发）：git@github.com:TusZyc/eve-esi.git
+- **技术栈**: Laravel 10 + PHP 8.2 + Blade + Tailwind CSS + Alpine.js + Redis
+- **部署**: Docker Compose → 阿里云 ECS (47.116.125.182)
+- **状态**: 持续开发中，由 Qoder 接替 OpenClaw 继续开发
+- **功能**: 12 个主要功能（SSO登录、仪表盘、技能、资产、KM、市场、角色信息、旗舰导航等）
+- **详细记忆**: 见 `projects/eve-esi.md`
 
 ## 服务器信息
 - 阿里云 ECS：47.116.125.182
@@ -53,6 +57,38 @@
 - 使用中文交流
 - 项目之前由 OpenClaw（AI 助手名"小图"）开发，现由 Qoder 接替
 - 代码推送到 eve-esi-qoder 仓库，不动原始 eve-esi 仓库
+
+## 代码优化重构（2026-03-17）
+
+### 已完成优化
+
+- **KillmailService 重构**: 2600行 → 门面模式(1066行) + 3子服务
+  - `Killmail/ProtobufCodec.php` - Protobuf 编解码
+  - `Killmail/BetaKbApiClient.php` - Beta KB API 客户端
+  - `Killmail/KillmailSearchService.php` - 搜索聚合
+- **AssetDataController 瘦身**: 955行 → 353行 + `AssetDataService`
+- **统一错误处理**: `EveApiException` + `ApiErrorHandler`
+- **统一缓存键管理**: `CacheKeyService` (TTL常量 + 缓存键方法)
+- **角色数据并行**: `CharacterDataService` (Http::pool 10-20s→3-5s)
+- **Token 刷新统一**: 所有服务使用 `TokenRefreshService`
+- **数据库索引**: corporation_id, alliance_id, token_expires_at
+- **Dashboard/角色属性缓存**: 5分钟 Redis缓存
+
+### 缓存体系 (80+ 缓存键)
+
+| 分类 | 前缀 | TTL |
+|------|------|-----|
+| 角色数据 | `char:*` | 5分钟 |
+| 资产数据 | `assets_raw_*` | 15分钟-24小时 |
+| KM数据 | `kb:*` | 5分钟-24小时 |
+| 市场数据 | `market_*` | 5分钟-7天 |
+| 导航数据 | `esi_*` | 24小时-7天 |
+
+### 待完成
+
+- 安全加固（HTTPS、Redis密码、Token加密等）
+- CacheKeyService 采用率提升（53%）
+- 缓存键命名风格统一
 
 ## 旗舰导航功能（2026-03-17）
 - 三标签页面：星系距离 / 一跳可达 / 路线规划
