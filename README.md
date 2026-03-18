@@ -9,6 +9,8 @@ qoder-memory/
 ├── MEMORY.md              # 长期记忆（项目概览、技术决策、偏好）
 ├── projects/
 │   └── eve-esi.md         # EVE ESI 项目状态
+├── ideas/
+│   └── admin-panel-design.md  # 后台管理页面设计方案
 └── logs/
     └── YYYY-MM-DD.md      # 每日开发日志
 ```

@@ -133,6 +133,22 @@
 - 限制：旗舰不能进入高安（>=0.5）和 Pochven（27 个星系硬编码）
 - API 端点：/api/capital-nav/autocomplete, distance, reachable, route（均 throttle:30,1）
 
+## EVE ESI 后台管理规划（2026-03-18）
+
+### 功能规划
+- **军团管理后台**：军团概况、成员管理、权限分级、资产统计、战报统计、导航配置
+- **站点管理后台**：用户角色管理、SSO 授权监控、日志监控、配置管理
+
+### 鉴权方案
+- 不新建账号系统，在现有 EVE SSO + Cookie 登录基础上叠加权限层
+- 极简版：config/admin.php 写死管理员角色ID + 中间件判断
+- 完整版：users 表加 role 字段（user/corp_admin/site_admin）
+
+### 详细设计
+见 `ideas/admin-panel-design.md`
+
+---
+
 ## KM 搜索技术细节
 
 ### Beta KB Search API
