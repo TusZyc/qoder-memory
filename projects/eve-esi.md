@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-17（第八次会话）**
+**最后更新：2026-03-18（第九次会话）**
 
 ## 已完成功能
 
@@ -176,6 +176,7 @@
 ### 11. 首页 "Tus Esi System (Beta)"（100% - 2026-03-13）
 - **视频背景**（第四次会话）：eve-esi-bg.webm (19MB) 全屏视频背景 + bg-black/55 遮罩层确保文字可读
 - **可读性优化**（第四次会话）：卡片改用 bg-black/40 backdrop-blur-lg，标签文字透明度全面提升
+- **备案信息**（2026-03-18）：页脚添加苏ICP备17024259号-9，链接到工信部网站
 - 实时服务器状态：晨曦(Serenity)/曙光(Infinity)/欧服(Tranquility) 三卡片
   - 显示：在线状态灯、在线人数、启动时间、版本号
   - ServerStatusController 公开 API 代理三个 ESI 端点，5 分钟缓存
@@ -262,3 +263,29 @@
 - Token 中间件：app/Http/Middleware/AutoRefreshEveToken.php
 - ESI 配置：config/esi.php
 - 缓存配置：config/cache.php（文件驱动）
+
+## HTTPS 配置（2026-03-18）
+
+### 域名与证书
+- **域名**: 51-eve.online
+- **证书类型**: 通配符证书（*.51-eve.online）
+- **颁发机构**: ZeroSSL（90天有效期）
+- **验证方式**: DNS-01（阿里云 DNS API）
+
+### 证书管理
+- **工具**: acme.sh v3.1.3
+- **证书目录**: `/etc/nginx/ssl/`
+- **自动续期**: 每天 14:01 cron 检查
+- **续期后命令**: `docker restart eve-esi-nginx`
+
+### Nginx 配置更新
+- **docker-compose.yml**: 添加 443 端口映射，挂载 `/etc/nginx/ssl`
+- **default.conf**: 
+  - HTTP 80 端口 301 重定向到 HTTPS
+  - HTTPS 443 端口 TLSv1.2/1.3
+  - ECDHE 加密套件
+  - 安全头: X-Frame-Options, X-Content-Type-Options
+
+### 访问地址
+- **HTTPS**: https://51-eve.online
+- **HTTP**: 自动跳转 HTTPS

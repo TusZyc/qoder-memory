@@ -1,6 +1,6 @@
 # Qoder 长期记忆
 
-**最后更新：2026-03-17**
+**最后更新：2026-03-18**
 
 ## 项目负责人
 - 名称：图斯（Tus）
@@ -11,6 +11,7 @@
 ### EVE ESI Tools (eve-esi-qoder)
 - **仓库**: https://github.com/TusZyc/eve-esi-qoder
 - **原始仓库**（OpenClaw 开发）：git@github.com:TusZyc/eve-esi.git
+- **域名**: https://51-eve.online（2026-03-18 配置 HTTPS）
 - **技术栈**: Laravel 10 + PHP 8.2 + Blade + Tailwind CSS + Alpine.js + Redis
 - **部署**: Docker Compose → 阿里云 ECS (47.116.125.182)
 - **状态**: 持续开发中，由 Qoder 接替 OpenClaw 继续开发
@@ -86,9 +87,40 @@
 
 ### 待完成
 
-- 安全加固（HTTPS、Redis密码、Token加密等）
+- ~~安全加固（HTTPS、Redis密码、Token加密等）~~ ✅ HTTPS 已完成（2026-03-18）
 - CacheKeyService 采用率提升（53%）
 - 缓存键命名风格统一
+
+## HTTPS 配置（2026-03-18）
+
+### 证书配置
+- **域名**: 51-eve.online（通配符证书 *.51-eve.online）
+- **证书颁发机构**: ZeroSSL
+- **有效期**: 90 天（到期前自动续期）
+- **验证方式**: DNS-01（阿里云 DNS API）
+- **工具**: acme.sh v3.1.3
+
+### 证书文件
+- 证书目录: `/etc/nginx/ssl/`
+- 证书文件: `51-eve.online.crt`（fullchain）
+- 私钥文件: `51-eve.online.key`
+
+### 自动续期
+- Cron: `1 14 * * *` 每天 14:01 检查续期
+- 续期后自动执行: `docker restart eve-esi-nginx`
+
+### Nginx 配置
+- HTTP (80): 301 重定向到 HTTPS
+- HTTPS (443): TLSv1.2/1.3，ECDHE 加密套件
+- 证书安装命令已配置 reloadcmd
+
+### 阿里云 AccessKey（DNS 验证）
+- 已配置在 acme.sh 配置文件中
+- 位置: `/root/.acme.sh/account.conf`
+
+### 注意事项
+- Nginx 1.29.6 不支持 `immutable` 参数，已移除
+- SSH 传输 Nginx 配置时变量会被本地 shell 展开，需用 base64 编码
 
 ## 旗舰导航功能（2026-03-17）
 - 三标签页面：星系距离 / 一跳可达 / 路线规划
