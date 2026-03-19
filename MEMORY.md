@@ -1,6 +1,6 @@
 # Qoder 长期记忆
 
-**最后更新：2026-03-18**
+**最后更新：2026-03-19**
 
 ## 项目负责人
 - 名称：图斯（Tus）
@@ -43,11 +43,11 @@
 ## EVE ESI API 经验
 
 ### 中文翻译陷阱
-- `universe/stations/{id}/` 不支持 `language=zh`，永远返回英文站名
-- `universe/names/` 批量端点也不支持 language 参数
+- `universe/stations/{id}/?datasource=serenity` 直接返回中文站名（无需 language 参数）
+- `universe/stations/{id}/` 国服 Serenity 数据源直接返回完整中文，不需要逐词翻译
+- `universe/names/` 批量端点不支持 language 参数
 - `universe/systems/{id}/?language=zh` 支持中文（可获取中文星系名）
-- NPC 空间站中文名：需逐段翻译（星系名 + "Moon"→"卫星" + 军团名 + 设施类型映射表）
-- 设施类型映射：Assembly Plant→组装工厂, Refinery→精炼厂, Warehouse→仓库 等
+- 逐词 str_replace 翻译会导致空格问题，应直接调用 ESI 接口获取原生中文名
 
 ### 数据格式
 - EVE 角色描述 `\xNN`：是 Unicode 码点 U+00NN，需 pack('H*','00'.$m[1]) → UCS-2BE → UTF-8
