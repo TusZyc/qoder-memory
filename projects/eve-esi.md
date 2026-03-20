@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-18（第九次会话）**
+**最后更新：2026-03-20**
 
 ## 已完成功能
 
@@ -152,7 +152,60 @@
 - 通过 layouts/partials/navbar.blade.php 共享，不再各页面独立维护
 - 当前页面 `bg-white/10` 高亮
 
-### 12. 旗舰导航功能（2026-03-17）
+### 13. 钱包功能（100% - 2026-03-19/20）
+- **WalletController**：钱包页面控制器
+- **WalletDataController API 端点**：
+  - `GET /api/dashboard/wallet/balance` — 角色钱包余额
+  - `GET /api/dashboard/wallet/journal` — 角色钱包流水
+  - `GET /api/dashboard/wallet/corp-balance` — 军团钱包余额（Division 1-7）
+  - `GET /api/dashboard/wallet/corp-journal` — 军团钱包流水（Division 1-7）
+- **前端**：角色钱包/军团钱包双标签页，Division 选择器，流水分页
+
+### 14. 书签/保存的地点（100% - 2026-03-19）
+- **BookmarkController**：页面控制器
+- **BookmarkDataController API 端点**：
+  - `GET /api/dashboard/bookmarks` — 角色书签列表
+  - `GET /api/dashboard/bookmarks/folders` — 书签文件夹
+- **前端**：书签列表 + 文件夹分组
+
+### 15. 联系人（100% - 2026-03-19）
+- **ContactController**：页面控制器
+- **ContactDataController API 端点**：
+  - `GET /api/dashboard/contacts` — 角色联系人列表
+- **前端**：联系人列表 + 好感度显示
+
+### 16. 合同（100% - 2026-03-19）
+- **ContractController**：页面控制器
+- **ContractDataController API 端点**：
+  - `GET /api/dashboard/contracts` — 角色合同列表
+  - `GET /api/dashboard/contracts/{id}/items` — 合同物品详情
+- **前端**：合同列表 + 物品详情模态框
+
+### 17. 装配（100% - 2026-03-19）
+- **FittingController**：页面控制器
+- **FittingDataController API 端点**：
+  - `GET /api/dashboard/fittings` — 角色装配列表
+- **前端**：装配列表 + 详情展开
+
+### 18. 击毁报告（100% - 2026-03-19）
+- **CharacterKillmailController**：页面控制器
+- **CharacterKillmailDataController API 端点**：
+  - `GET /api/dashboard/killmails` — 角色 KM 列表
+- **前端**：KM 列表 + 详情跳转
+
+### 19. 通知/提醒（100% - 2026-03-19）
+- **NotificationController**：页面控制器
+- **NotificationDataController API 端点**：
+  - `GET /api/dashboard/notifications` — 角色通知列表
+- **前端**：通知列表 + 分类筛选
+
+### 20. 声望（100% - 2026-03-19）
+- **StandingController**：页面控制器
+- **StandingDataController API 端点**：
+  - `GET /api/dashboard/standings` — 角色声望列表
+- **前端**：声望列表 + 势力/军团/个人分类
+
+### 21. 旗舰导航功能（2026-03-17）
 - **CapitalNavController**：公开访问页面控制器
 - **CapitalNavApiController API 端点**：
   - `GET /api/capital-nav/autocomplete?q=关键词` — 星系中文名模糊搜索
@@ -202,15 +255,28 @@
 
 | 优先级 | 功能 | 状态 |
 |--------|------|------|
-| 高 | 钱包查询页面 | 路由和 Controller 方法存在，缺视图 |
 | 高 | 资产估值（价格数据） | API 框架完成，缺价格数据 |
 | 中 | 军团管理页面 | 无代码 |
-| 低 | 合同查询 | 无代码 |
 | 低 | 数据可视化 | 无代码 |
 
-## 代码优化（2026-03-17）
+## 代码优化
 
-### 已完成重构
+### 2026-03-20 重构
+
+- **BasePageController 基础控制器**：新增抽象基类
+  - 提供 `renderPage()` 方法，自动注入 `$user` 和 `$isLoggedIn`
+  - 11 个简单页面控制器重构继承此基类
+- **User 模型**：新增 `hasEveCharacter()` 辅助方法
+- **Token 刷新中间件修复**：
+  - 修复 `AutoRefreshEveToken` 静默失败 bug
+  - 刷新失败时正确处理：过期则 401/重定向，未过期则警告日志
+- **项目清理**：
+  - 删除所有垃圾文件（.md 文档、.sh 脚本、测试文件）
+  - 删除测试视图（test.blade.php、system-distance-test.blade.php）
+  - 更新 .gitignore 规则
+  - 删除导航栏"保存的地点"按钮
+
+### 2026-03-17 重构
 
 - **KillmailService 门面模式重构**：2600行 → 1066行门面 + 3个子服务
   - `Killmail/ProtobufCodec.php` - Protobuf 编解码逻辑
