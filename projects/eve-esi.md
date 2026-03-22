@@ -1,6 +1,6 @@
 # EVE ESI 管理网站 - 项目状态
 
-**最后更新：2026-03-20**
+**最后更新：2026-03-22**
 
 ## 已完成功能
 
@@ -174,12 +174,14 @@
   - `GET /api/dashboard/contacts` — 角色联系人列表
 - **前端**：联系人列表 + 好感度显示
 
-### 16. 合同（100% - 2026-03-19）
+### 16. 合同（100% - 2026-03-19，ESI限制说明 2026-03-22）
 - **ContractController**：页面控制器
 - **ContractDataController API 端点**：
   - `GET /api/dashboard/contracts` — 角色合同列表
   - `GET /api/dashboard/contracts/{id}/items` — 合同物品详情
-- **前端**：合同列表 + 物品详情模态框
+- **军团合同**：支持获取军团合同（需军团权限）
+- **ESI API 限制说明**：仅返回30天内或未完成的合同
+- **前端**：合同列表 + 物品详情模态框 + ESI限制提示
 
 ### 17. 装配（100% - 2026-03-19）
 - **FittingController**：页面控制器
@@ -251,13 +253,43 @@
 - GET /api/market/character-orders, my-order-ids（认证市场 API）
 - GET /api/killmails/autocomplete, advanced-search, search, pilot/{id}/kills, kill/{id}（KM API）
 
-## 待开发功能
+### 22. 邮件功能（100% - 2026-03-21）
+- **MailController**：页面控制器
+- **MailDataController API 端点**：
+  - `GET /api/mail/labels` — 邮件标签列表（收件箱、已发送等）
+  - `GET /api/mail/lists` — 邮件群组列表
+  - `GET /api/mail` — 邮件列表（支持标签筛选）
+  - `GET /api/mail/{id}` — 邮件详情
+- **前端**：
+  - 左侧标签/群组筛选（中文化：Inbox→收件箱、Sent→已发送、[Corp]→[军团]、[Alliance]→[联盟]）
+  - 发件人/收件人 ID 转中文名称（角色/军团/联盟/群组）
+  - 类型图标显示（👔角色/🏛军团/🤝联盟/👥群组）
+  - 加载更多分页
+- **ESI API 限制**：不支持按群组 ID 筛选，前端实现群组过滤
 
-| 优先级 | 功能 | 状态 |
-|--------|------|------|
-| 高 | 资产估值（价格数据） | API 框架完成，缺价格数据 |
-| 中 | 军团管理页面 | 无代码 |
-| 低 | 数据可视化 | 无代码 |
+### 23. LP Store 忠诚点计算器（100% - 2026-03-22）
+- **LpStoreController**：页面控制器
+- **LpStoreService**：ESI API 封装 + 利润计算
+- **API 端点**：
+  - `GET /api/public/lp-store/factions` — 势力列表
+  - `GET /api/public/lp-store/corporations?faction_id=X` — 势力下公司列表
+  - `GET /api/public/lp-store/offers?corporation_id=X` — LP 报价及利润计算
+- **价格计算模式**（2026-03-22 新增）：
+  - 材料成本计算方式：默认（全服均价）/ 收单价（吉他4最高买单）/ 卖单价（吉他4最低卖单）
+  - 产出单价计算方式：默认（全服均价）/ 收单价（吉他4最高买单）/ 卖单价（吉他4最低卖单）
+  - 吉他4号空间站 ID：60003760，伏尔戈星域 ID：10000002
+- **前端**：势力/公司选择器 + 价格模式选择 + 利润表格（LP成本、ISK成本、材料成本、收入、利润、LP比例）
+
+### 24. 舰队管理功能（开发中 - 2026-03-21）
+- **FleetController**：页面控制器
+- **FleetService**：舰队快照、出勤统计
+- **模型**：FleetOperation、FleetSnapshot、FleetMemberSnapshot、FleetAttendanceSummary
+- **前端**：舰队列表、创建舰队、出勤报告
+
+### 25. Guide 使用指南页面（100% - 2026-03-22）
+- 路由：`GET /guide`
+- 功能介绍：仪表盘、技能、资产、市场、KM查询、旗舰导航、LP Store、邮件、合同等
+- 授权后解锁功能说明
 
 ## 代码优化
 
@@ -320,7 +352,12 @@
 - 市场：app/Http/Controllers/MarketController.php + app/Http/Controllers/Api/MarketDataController.php + app/Services/MarketService.php
 - KM 查询：app/Http/Controllers/Api/KillmailController.php + app/Services/KillmailService.php
 - 游客仪表盘：app/Http/Controllers/GuestDashboardController.php
+- 邮件：app/Http/Controllers/MailController.php + app/Http/Controllers/Api/MailDataController.php + resources/views/mail/index.blade.php
+- LP Store：app/Http/Controllers/LpStoreController.php + app/Services/LpStoreService.php + resources/views/lpstore/index.blade.php
+- 舰队：app/Http/Controllers/FleetController.php + app/Services/Fleet/FleetService.php + resources/views/fleet/
+- 合同：app/Http/Controllers/ContractController.php + app/Http/Controllers/Api/ContractDataController.php + resources/views/contracts/index.blade.php
 - 数据服务：app/Services/EveDataService.php + app/Helpers/EveHelper.php
+- EVE静态数据：data/eve_systems.json, data/eve_stations.json, data/eve_items.json, data/eve_regions.json, data/eve_constellations.json
 - 数据更新脚本：scripts/update_evedata.py
 - 数据更新命令：app/Console/Commands/UpdateEveData.php
 - 市场缓存命令：app/Console/Commands/CacheMarketGroups.php
