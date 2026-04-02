@@ -1,14 +1,42 @@
 # 进行中的任务
 
-**最后更新**: 2026-04-02 20:30
+**最后更新**: 2026-04-02 23:35
 **更新者**: [Qoder]
+
+---
+
+## ✅ P0代码优化（已完成）
+
+**状态**: ✅ 已完成
+**优先级**: 最高
+**负责**: [Qoder]
+**commit**: `2c6f586`
+
+### P0-1: Token重复查询问题
+- [x] 创建 TokenService 统一Token获取服务
+- [x] 同一请求周期内只查询数据库一次
+- [x] 修改10个控制器使用TokenService替代重复查询
+- [x] 预计减少约80%的Token数据库查询
+
+### P0-2: 空间站名称代码重复问题
+- [x] 增强 StationNameService 为统一服务
+- [x] 本地数据优先 + ESI兜底 + 私有建筑处理
+- [x] 重构 AssetDataService、MarketService、CharacterLocationController
+- [x] 消除约200行重复代码
+
+### 优化效果
+| 页面 | 优化前 | 优化后 |
+|-----|-------|-------|
+| 钱包页面 `/wallet` | Token查询7次 | Token查询1次 |
+| 邮件页面 `/mail` | Token查询5次 | Token查询1次 |
+| 技能页面 `/skills` | Token查询3次 + 逐个查询 | Token查询1次 + 批量查询 |
 
 ---
 
 ## 🔴 代码审查问题修复
 
 **状态**: 🔄 进行中
-**优先级**: 最高
+**优先级**: 高
 **负责**: [Claude Code]
 
 ### 背景
@@ -94,6 +122,8 @@
 ## 历史任务归档
 
 ### 2026-04-02 完成
+- [x] **P0代码优化**: TokenService统一服务 + StationNameService重构（+1118/-382行）`[Qoder]`
+- [x] 部署 `2c6f586` 到服务器（15个文件）`[Qoder]`
 - [x] Claude Code 全面 Review + Bug 修复（20个文件，+622/-182）`[Claude Code]`
 - [x] 部署 `3e6a96a` 到服务器 `[Qoder]`
 
