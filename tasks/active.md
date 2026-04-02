@@ -1,6 +1,6 @@
 # 进行中的任务
 
-**最后更新**: 2026-04-01 11:00
+**最后更新**: 2026-04-02 20:30
 
 ---
 
@@ -17,38 +17,54 @@
 
 ---
 
-## 虫洞功能验证
+## Claude Code 全面 Review 与 Bug 修复
 
-**状态**: 🔄 待验证  
-**优先级**: 高
+**状态**: ✅ 已完成并部署  
+**优先级**: 高  
+**提交**: `3e6a96a` (Co-Authored-By: Claude Opus 4.6)
 
-### 背景
-2026-03-25 ~ 04-01 完整开发了虫洞查询系统，2604个虫洞星系数据
+### 修复内容
+- [x] 所有API控制器 `Cache::remember` 闭包内Token过期问题（闭包内获取最新Token，失败不缓存）
+- [x] TokenRefreshService 添加 Redis 锁防止并发刷新
+- [x] 新增通知轻量级 summary 端点（下拉框秒开）
+- [x] 首页视频加载前星空流星 CSS 动画
+- [x] 补全 ESI 调用缺失的 `datasource=serenity`
+- [x] 三个布局文件添加 CSRF meta 标签
+- [x] 合同接口改为5分钟缓存（移除错误的 `Cache::forget`）
+- [x] 移除技能页面60秒自动刷新
+- [x] 删除无用的 `CharacterController::refresh()` 空方法及路由
+- [x] 添加 CLAUDE.md 项目开发指南
 
-### 主要功能
-- 虫洞星系搜索（支持 J 编号）
-- 星系详情：行星类型/天体/效果/Zkillboard KM
-- 行星类型中文名从 `/universe/types/{id}/?language=zh` 获取
-- 搜索不存在星系时返回友好错误页（非 404 白页）
-
-### 验证步骤
-1. 访问 https://51-eve.online/wormhole
-2. 搜索 J100001，确认能显示星系详情
-3. 确认行星类型显示中文名称
-4. 搜索不存在的星系，确认显示友好错误提示
-
-### 相关 Commits
-- `cb85a07` - feat: 虫洞查询功能完整数据+页面+API
-- `970fa51` - chore: 删除废弃 navbar.blade.php
-- `40b9e40` - fix: 虫洞页面优化（侧边栏/样式/效果中文/KM时间范围）
-- `0067fe4` - fix: 虫洞优化（行星类型解析/搜索错误处理/星系半径/KM限5条）
+### 涉及文件（20个）
+```
+CLAUDE.md (+)
+app/Http/Controllers/Api/BookmarkDataController.php
+app/Http/Controllers/Api/CharacterKillmailDataController.php
+app/Http/Controllers/Api/CharacterOnlineController.php
+app/Http/Controllers/Api/ContactDataController.php
+app/Http/Controllers/Api/ContractDataController.php
+app/Http/Controllers/Api/FittingDataController.php
+app/Http/Controllers/Api/MailDataController.php
+app/Http/Controllers/Api/NotificationDataController.php
+app/Http/Controllers/Api/SkillDataController.php
+app/Http/Controllers/Api/StandingDataController.php
+app/Http/Controllers/Api/WalletDataController.php
+app/Http/Controllers/CharacterController.php
+app/Services/TokenRefreshService.php
+resources/views/layouts/admin.blade.php
+resources/views/layouts/app.blade.php
+resources/views/layouts/guest.blade.php
+resources/views/skills/index.blade.php
+resources/views/welcome.blade.php
+routes/web.php
+```
 
 ---
 
 ## 待办队列
 
 ### 高优先级
-- [ ] 验证虫洞功能（行星类型/搜索错误处理）
+- [ ] 修复通知接口 `ESI request failed for universe/names` 错误
 - [ ] 验证市场搜索功能
 
 ### 中优先级
@@ -62,6 +78,10 @@
 ---
 
 ## 历史任务归档
+
+### 2026-04-02 完成
+- [x] Claude Code 全面 Review + Bug 修复（20个文件，+622/-182）
+- [x] 部署 `3e6a96a` 到服务器
 
 ### 2026-04-01 完成
 - [x] GitHub 同步（4个虫洞优化文件）

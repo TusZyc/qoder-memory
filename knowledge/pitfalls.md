@@ -41,6 +41,10 @@ ESI `universe/stations/{id}` 不支持 `language=zh`，需要 6 步翻译：
 - **不支持按群组 ID 筛选**：ESI `/characters/{id}/mail/` 不支持 `mailing_list_id` 参数
 - **解决方案**：获取全部邮件，前端实现群组过滤
 
+### ESI datasource 参数缺失（2026-04-02 发现）
+**问题**：国服 ESI 调用未带 `datasource=serenity` 参数，导致返回全球服数据  
+**解决**：所有 ESI API 调用必须显式添加 `datasource=serenity`，包括 `universe/names` 等端点
+
 ### ESI 数据格式
 | 问题 | 解决方案 |
 |------|---------|
@@ -95,6 +99,29 @@ docker compose exec -T app php artisan route:clear
 **问题**：tarball 方式部署导致 PHP `$` 变量符号丢失  
 **解决**：改用 SCP 直传文件
 
+### Token 缓存闭包陷阱（2026-04-02 Claude Code 发现）
+**问题**：API 控制器在 `Cache::remember` 闭包外部获取 Token，闭包执行时 Token 可能已过期  
+**原因**：缓存未命中时闭包延迟执行，闭包捕获的是外部旧 Token  
+**解决**：闭包内部重新获取最新 Token，获取失败时不缓存结果
+```php
+// ✗ 错误写法
+$token = $user->eve_access_token;
+return Cache::remember($key, 300, function () use ($token) {
+    // token 可能已过期
+    return $this->callEsiApi($token);
+});
+
+// ✓ 正确写法
+return Cache::remember($key, 300, function () use ($user) {
+    $token = $user->fresh()->eve_access_token; // 闭包内获取最新
+    return $this->callEsiApi($token);
+});
+```
+
+### TokenRefreshService 并发刷新问题（2026-04-02）
+**问题**：多个请求同时触发 Token 刷新，导致重复调用 OAuth  
+**解决**：添加 Redis 分布式锁 `Cache::lock("token_refresh:{$userId}", 10)`
+
 ---
 
 ## 数据文件
@@ -139,6 +166,13 @@ cd /opt/eve-esi
 git add -A
 git commit -m "feat: xxx"
 git push origin main
+```
+
+### CSRF 保护（2026-04-02 补全）
+**问题**：布局文件缺少 CSRF meta 标签，导致 AJAX 请求可能被拒绝  
+**解决**：在 `app.blade.php`、`guest.blade.php`、`admin.blade.php` 的 `<head>` 中添加：
+```html
+<meta name="csrf-token" content="{{ csrf_token() }}">
 ```
 
 ---
