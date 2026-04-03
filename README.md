@@ -20,12 +20,13 @@
 |------|------|------|----------|
 | 1 | **本文件 README.md** | 了解协作规范和规则 | ✅ 必读 |
 | 2 | **HANDOFF.md** | 了解当前项目状态、最近进展、待办事项 | ✅ 必读 |
-| 3 | **tasks/active.md** | 了解进行中的任务详情 | ✅ 必读 |
-| 4 | knowledge/code-review.md | 代码审查报告（如果要修 bug） | 按需 |
-| 5 | knowledge/pitfalls.md | 踩坑记录（如果遇到技术问题） | 按需 |
-| 6 | knowledge/project-overview.md | 项目功能全貌（如果不了解项目） | 按需 |
-| 7 | knowledge/deployment.md | 部署和运维（如果要操作服务器） | 按需 |
-| 8 | tasks/backlog.md | 待办队列（如果要找新任务） | 按需 |
+| 3 | **knowledge/dev-rules.md** | 开发规范（代码组织、ESI调用、部署验证） | ✅ 必读 |
+| 4 | **tasks/active.md** | 了解进行中的任务详情 | ✅ 必读 |
+| 5 | knowledge/code-review.md | 代码审查报告（如果要修 bug） | 按需 |
+| 6 | knowledge/pitfalls.md | 踩坑记录（如果遇到技术问题） | 按需 |
+| 7 | knowledge/project-overview.md | 项目功能全貌（如果不了解项目） | 按需 |
+| 8 | knowledge/deployment.md | 部署和运维（如果要操作服务器） | 按需 |
+| 9 | tasks/backlog.md | 待办队列（如果要找新任务） | 按需 |
 
 ---
 
@@ -84,7 +85,9 @@ qoder-memory/
 ├── HANDOFF.md                 # 【状态】当前项目快照
 │
 ├── knowledge/                 # 【知识库】技术文档（按需查阅）
+│   ├── dev-rules.md           #   ⭐ 开发规范（必读）
 │   ├── code-review.md         #   代码审查报告 [Claude Code]
+│   ├── esi-endpoints.md       #   ESI API 完整端点参考（公开/认证分类）
 │   ├── pitfalls.md            #   踩坑记录与调试经验
 │   ├── project-overview.md    #   项目功能概览
 │   └── deployment.md          #   部署与运维手册
