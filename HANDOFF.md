@@ -2,9 +2,9 @@
 
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
-**最后更新**: 2026-04-02 23:35
-**更新者**: [Qoder]
-**当前设备**: 家里电脑
+**最后更新**: 2026-04-03
+**更新者**: [Claude Code]
+**当前设备**: 用户本地
 
 ---
 
@@ -13,7 +13,7 @@
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
 | P0代码优化 | ✅ 已完成 | 最高 | [Qoder] |
-| 修复通知接口 ESI universe/names 错误 | 🔄 待修复 | 高 | [待分配] |
+| 修复通知接口 ESI universe/names 错误 | ✅ 已完成 | 高 | [Claude Code] |
 | 验证市场搜索功能 | ⏳ 待验证 | 中 | [待分配] |
 
 详细任务清单见 `tasks/active.md`
@@ -24,6 +24,7 @@
 
 | 日期 | 内容 | 操作者 |
 |------|------|--------|
+| 4-03 | UI修复：21页面标题/合同NaN/服务器维护检测/装配搜索，部署 `cde8d06` | [Claude Code] |
 | 4-02 | **P0优化完成**: TokenService统一服务 + StationNameService重构，减少80%重复查询 | [Qoder] |
 | 4-02 | 部署 `2c6f586` 到服务器（15个文件） | [Qoder] |
 | 4-02 | 部署 `3e6a96a` 到服务器（git pull + 缓存清理） | [Qoder] |
@@ -37,12 +38,12 @@
 
 | 项目 | 值 |
 |------|-----|
-| 最后部署 | 2026-04-02 23:30 [Qoder] |
-| 最后commit | `2c6f586` (refactor: 解决P0问题 - TokenService统一服务与空间站名称服务重构) |
+| 最后部署 | 2026-04-03 [Claude Code via SSH] |
+| 最后commit | `cde8d06` (Fix page titles, contract NaN, server maintenance, fitting search) |
 | 待部署变更 | 无 |
 | Docker容器 | eve-esi-app / eve-esi-nginx / eve-esi-redis ✅ 运行中 |
 | HTTPS证书 | ZeroSSL，90天，每日14:01自动续期 |
-| GitHub同步 | ✅ 已同步至 `2c6f586` |
+| GitHub同步 | ✅ 已同步至 `cde8d06` |
 
 ---
 
@@ -62,6 +63,9 @@
 ## 下一步计划
 
 1. 验证P0优化效果（钱包/资产/市场页面性能）
-2. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
-3. 测试后台管理缓存功能
-4. 继续修复代码审查剩余问题（详见 `knowledge/code-review.md`）
+2. 测试后台管理缓存功能
+3. 继续修复代码审查剩余问题（详见 `knowledge/code-review.md`）
+   - alert()→toast 替换
+   - 错误信息脱敏
+   - Chart.js 懒加载
+   - Vite+Tailwind 构建优化
