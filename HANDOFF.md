@@ -24,6 +24,7 @@
 
 | 日期 | 内容 | 操作者 |
 |------|------|--------|
+| 4-03 | KM图片生成器技术验证：PHP GD + EVE图片服务器方案可行，见 ideas/km-image-generator.md | [Claude Code] |
 | 4-03 | UI修复：21页面标题/合同NaN/服务器维护检测/装配搜索，部署 `cde8d06` | [Claude Code] |
 | 4-02 | **P0优化完成**: TokenService统一服务 + StationNameService重构，减少80%重复查询 | [Qoder] |
 | 4-02 | 部署 `2c6f586` 到服务器（15个文件） | [Qoder] |

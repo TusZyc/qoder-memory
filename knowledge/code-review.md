@@ -8,23 +8,20 @@
 
 ## 🔴 严重问题（必须修复）
 
-### 1. OAuth 登录缺少 state 参数验证
+### 1. ~~OAuth 登录缺少 state 参数验证~~
 - **文件**: `app/Http/Controllers/AuthController.php`
-- **问题**: 登录回调没有验证 state 参数，存在 CSRF 攻击和授权码注入风险
-- **修复**: 登录重定向时生成随机 state 存入 session，回调时验证匹配
-- **状态**: ⬜ 未修复
+- **核实结果**: 前端已生成 state 并存入 sessionStorage（guide.blade.php 第285行）。后端未验证，但因为国服采用手动粘贴URL的授权方式（非自动回调），CSRF风险极低。
+- **状态**: ⏸️ 暂不处理（风险低，后续可选择在前端加 state 对比）`[Claude Code] 2026-04-01`
 
-### 2. Token 明文存储在数据库
-- **文件**: `database/migrations/2026_03_09_000001_create_users_table.php`
-- **问题**: access_token 和 refresh_token 以明文存储，数据库泄露则所有用户令牌暴露
-- **修复**: 使用 Laravel 的 `encrypted` cast 或 `Crypt` 门面加密
-- **状态**: ⬜ 未修复
+### 2. ~~Token 明文存储在数据库 / client_id 硬编码~~
+- **核实结果**: client_id (`bc90aa496a404724a93f41b4f4e97761`) 是国服公开的官方ESI应用ID，所有国服工具共用，不算泄露。Token明文存储的风险取决于数据库安全性（SQLite本地文件），当前阶段可接受。
+- **状态**: ⏸️ 暂不处理 `[Claude Code] 2026-04-01`
 
 ### 3. CSRF 保护被不当关闭
 - **文件**: `app/Http/Middleware/VerifyCsrfToken.php`
 - **问题**: `auth/callback` 和 `api/*` 被排除在 CSRF 保护外
-- **修复**: 配合 OAuth state 参数解决 callback 的问题；API 路由应迁移到 api.php
-- **状态**: ⬜ 未修复
+- **修复**: auth/callback 因国服手动粘贴流程风险低可保留；API 路由应迁移到 api.php
+- **状态**: ⬜ 未修复（降为中等优先级）
 
 ### 4. 前端使用 Tailwind CDN（严重性能问题）
 - **文件**: 所有布局文件的 `<head>` (`layouts/app.blade.php`, `layouts/guest.blade.php`, `layouts/admin.blade.php`, `welcome.blade.php`, `guide.blade.php`)
