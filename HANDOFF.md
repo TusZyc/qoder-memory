@@ -14,7 +14,8 @@
 |------|------|--------|------|
 | P0代码优化 | ✅ 已完成 | 最高 | [Qoder] |
 | 修复通知接口 ESI universe/names 错误 | ✅ 已完成 | 高 | [Claude Code] |
-| KM 图片生成器开发 | 🚧 代码完成，服务器待恢复 | 中 | [Claude Code] |
+| KM 图片生成器开发 | 🚧 代码完成，服务器待恢复 | 高 | [Claude Code] |
+| 服务器 Docker 重建（OOM后恢复） | 🔴 待处理 | 最高 | [Qoder] |
 | 验证市场搜索功能 | ⏳ 待验证 | 中 | [待分配] |
 
 详细任务清单见 `tasks/active.md`
@@ -91,13 +92,15 @@ docker exec eve-esi-app php artisan route:clear
 1. **PHP 静态变量缓存**：修改 PHP 代码后需 `docker restart eve-esi-app` 才能生效
 2. **Redis 缓存清空后**：市场搜索可能超时，已改为优先从静态文件加载
 3. **数据文件保护**：`data/*.json` 不能删除，提交前用 git status 检查
-4. **Token缓存闭包**：`Cache::remember` 闭包必须在内部获取最新Token，不可在外部获取后传入
-5. **ESI datasource**：国服ESI所有调用必须带 `datasource=serenity`
-6. **海外SSH受限**：从海外网络连不上服务器（阿里云安全组限制），需从中国大陆网络操作
-7. **多AI协作**：[Claude Code] 负责代码审查与修复（走GitHub），[Qoder] 负责部署与服务器操作
-8. **Docker build 内存**：服务器内存较小，编译 PHP 扩展容易 OOM，建议先加 2GB swap 再 build
-9. **Debian 镜像源**：Dockerfile 已配置阿里云镜像 `mirrors.aliyun.com`，国内 build 快很多
-10. **PHP GD 命名空间**：GD函数在命名空间类中必须用 `use function imagettftext;` 等显式导入
+4. **虫洞行星类型**：使用 `/universe/types/{type_id}/?language=zh` 获取中文名，已缓存30天
+5. **Token缓存闭包**：`Cache::remember` 闭包必须在内部获取最新Token，不可在外部获取后传入
+6. **ESI datasource**：国服ESI所有调用必须带 `datasource=serenity`
+7. **海外SSH受限**：从海外网络连不上服务器（阿里云安全组限制），需从中国大陆网络操作
+8. **多AI协作**：[Claude Code] 负责代码审查与修复（走GitHub），[Qoder] 负责部署与服务器操作
+9. **Docker build 内存**：服务器内存较小，编译 PHP 扩展容易 OOM，建议先加 2GB swap 再 build
+10. **Debian 镜像源**：Dockerfile 已配置阿里云镜像 `mirrors.aliyun.com`，国内 build 快很多
+11. **PHP GD 命名空间**：GD函数在命名空间类中必须用 `use function imagettftext;` 等显式导入
+12. **KM图片字体**：NotoSansSC-Regular.ttf 和 NotoSansSC-Bold.ttf 已上传至 `/opt/eve-esi/storage/fonts/`
 
 ---
 

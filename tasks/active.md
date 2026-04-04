@@ -5,6 +5,51 @@
 
 ---
 
+## 🔴 服务器 OOM 恢复
+
+**状态**: 🔴 待处理
+**优先级**: 最高
+**负责**: [Qoder]
+
+### 背景
+2026-04-04 重建 Docker 镜像时（编译 PHP GD FreeType 扩展），服务器内存耗尽导致 OOM kill。
+VNC 截图显示内核 OOM killer 杀掉了 php-fpm, systemd, AliYunDunMonito 等进程。
+
+### 恢复步骤
+- [ ] VNC 登录，确认系统是否可正常访问
+- [ ] 添加 2GB swap：`fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile`
+- [ ] `cd /opt/eve-esi && docker-compose build --no-cache app`（有swap后编译不会OOM）
+- [ ] `docker-compose up -d`
+- [ ] 验证 GD：`docker exec eve-esi-app php -r "var_dump(gd_info());"`（需 FreeType Support: true）
+- [ ] `git pull origin main`（拉取 `4bc5e05` KM图片功能）
+- [ ] 测试 KM 图片端点：`GET /api/killmails/kill/22460248/image`
+
+---
+
+## ✅ KM 图片生成功能（代码完成）
+
+**状态**: ✅ 代码完成，待服务器恢复后验证
+**优先级**: 高
+**负责**: [Claude Code]
+**commit**: `4bc5e05`
+
+### 完成内容
+- [x] `KillmailImageService.php`（843行）：服务端 PHP GD 图片生成
+- [x] 布局：标题栏 → 头部（头像+舰船渲染+信息）→ 统计栏 → [左:攻击者列表 | 右:装备槽位]→ 页脚
+- [x] EVE in-game KM UI 风格（深蓝黑主题，黄色标题）
+- [x] `KillmailController::killImage()` 路由：`GET /api/killmails/kill/{killId}/image`
+- [x] `/killmails` 页面添加"生成 KM 图片"面板（紫色主题，输入KM ID，预览+下载）
+- [x] NotoSansSC 字体上传至服务器 `/opt/eve-esi/storage/fonts/`
+- [x] Dockerfile 已修改支持 GD FreeType/JPEG/WebP（需 rebuild 才能生效）
+- [x] 修复 PHP 命名空间 GD 函数调用问题（`use function imagettftext;` 等）
+
+### 待验证（服务器恢复后）
+- [ ] 测试中文字符渲染
+- [ ] 测试图片缓存机制
+- [ ] 测试大量攻击者时的布局
+
+---
+
 ## ✅ P0代码优化（已完成）
 
 **状态**: ✅ 已完成
@@ -24,63 +69,11 @@
 - [x] 重构 AssetDataService、MarketService、CharacterLocationController
 - [x] 消除约200行重复代码
 
-### 优化效果
-| 页面 | 优化前 | 优化后 |
-|-----|-------|-------|
-| 钱包页面 `/wallet` | Token查询7次 | Token查询1次 |
-| 邮件页面 `/mail` | Token查询5次 | Token查询1次 |
-| 技能页面 `/skills` | Token查询3次 + 逐个查询 | Token查询1次 + 批量查询 |
-
----
-
-## ✅ 通知接口 ESI 错误（已修复）
-
-**状态**: ✅ 已完成
-**负责**: [Claude Code]
-**commit**: `cde8d06`
-
-- [x] 修复 `NotificationDataController.php` 第 422 行 ESI universe/names 调用错误
-- [x] 公共端点移除不必要 token 认证
-- [x] ESI names 批次 404 自动拆分重试
-
----
-
-## 🚧 KM 图片生成器（进行中，待服务器恢复）
-
-**状态**: 🚧 代码已完成，服务器部署受阻（OOM）
-**优先级**: 中
-**负责**: [Claude Code]
-**commit**: `4bc5e05`
-
-### 已完成
-- [x] 布局设计：参考游戏内击毁报告 UI（900px 宽，仿 EVE 深色主题）
-- [x] `KillmailImageService.php`（843行）：PHP GD 图片生成服务
-  - 标题栏 + 角色头像/舰船渲染 + 参与者列表 + 装备明细（按槽位分组）
-  - 从 EVE 图片服务器获取头像/图标/渲染图（带本地缓存）
-  - NotoSansSC TTF 字体，字体文件已上传到服务器 `storage/fonts/`
-  - "最后一击"/"造成伤害最多" 参与者分组
-- [x] `KillmailController` 新增 `killImage()` 接口
-- [x] 路由：`GET /api/killmails/kill/{id}/image`
-- [x] `/killmails` 页面右栏新增"生成 KM 图片" UI（输入框+预览+下载）
-- [x] 修复 PHP 命名空间下 GD 函数调用问题（添加 `use function` 声明）
-- [x] 修改 `Dockerfile`：加入 FreeType/JPEG/WebP 依赖 + 阿里云镜像源
-
-### 待完成（需服务器恢复）
-- [ ] 服务器恢复 + 加 Swap（Tus 操作）
-- [ ] 重建 Docker 镜像（已换阿里云源，约3-5分钟）
-- [ ] 验证 GD FreeType 支持：`php -r "print_r(gd_info());"`
-- [ ] 测试接口 `GET /api/killmails/kill/22460248/image`
-
-### 待优化（功能验证后）
-- [ ] 研究如何更接近游戏内截图风格（间距、字体大小等微调）
-- [ ] 图片生成加水印/生成者信息
-- [ ] 考虑接入 WebSocket 实时通知 KM
-
 ---
 
 ## 🔴 代码审查问题修复
 
-**状态**: 🔄 进行中
+**状态**: 🔄 进行中（部分完成）
 **优先级**: 高
 **负责**: [Claude Code]
 
@@ -113,15 +106,36 @@
 
 ---
 
+## 🔴 通知接口 ESI 错误
+
+**状态**: 🔄 待修复
+**优先级**: 最高
+**负责**: [待分配]
+
+### 问题
+服务器日志报错：`ESI request failed for universe/names`
+- 文件：`NotificationDataController.php` 第 422 行
+- 在 `resolveNames()` 方法中调用 ESI `universe/names` 接口失败
+- 错误被 `Cache::remember` 缓存了（1小时 TTL），会持续影响
+
+### 日志原文
+```
+[2026-04-02 19:56:37] production.WARNING: ESI names 解析失败: ESI request failed for universe/names
+[2026-04-02 19:56:37] production.ERROR: 🔔 [Notifications] 获取提醒数据失败
+```
+
+---
+
 ## 待办队列
 
 ### 高优先级
-- [ ] **恢复服务器**（Tus 操作，见 HANDOFF.md 恢复步骤）
-- [ ] 验证 KM 图片生成接口 `[Claude Code]`
-- [ ] 修复代码审查剩余严重问题 `[Claude Code]`
+- [ ] **服务器 OOM 恢复** + rebuild Docker + 验证 KM 图片功能 `[Qoder]`
+- [ ] 修复通知接口 `ESI request failed for universe/names` 错误 `[待分配]`
+- [ ] 修复代码审查剩余严重问题（见上方清单）`[Claude Code]`
+- [ ] 验证市场搜索功能 `[Qoder]`
 
 ### 中优先级
-- [ ] 验证市场搜索功能 `[Qoder]`
+- [ ] KM 图片布局细化（攻击者分组、装备图标对齐）`[Claude Code]`
 - [ ] 修复代码审查中等问题 `[Claude Code]`
 - [ ] 测试后台管理缓存功能 `[待分配]`
 - [ ] Redis 缓存预热优化 `[待分配]`
@@ -129,20 +143,14 @@
 ### 低优先级
 - [ ] CacheKeyService 统一使用
 - [ ] 提取公共 JS/CSS 到共享文件
-- [ ] KM 图片生成器后续优化（水印、WebSocket 通知）
 
 ---
 
 ## 历史任务归档
 
 ### 2026-04-04 完成
-- [x] KM 图片生成器代码实现（`4bc5e05`）`[Claude Code]`
-- [x] 上传字体文件 NotoSansSC 到服务器 `[Claude Code]`
-- [x] Dockerfile 换阿里云镜像源 + FreeType 支持 `[Claude Code]`
-
-### 2026-04-03 完成
-- [x] 多项 UI 修复（页面标题/合同NaN/服务器维护/装配搜索）`[Claude Code]`
-- [x] 部署 `cde8d06` `[Claude Code]`
+- [x] **KM图片生成功能**: KillmailImageService (843行) + 前端面板 + 字体上传 `[Claude Code]`
+- [x] GitHub 推送 `4bc5e05` `[Claude Code]`
 
 ### 2026-04-02 完成
 - [x] **P0代码优化**: TokenService统一服务 + StationNameService重构（+1118/-382行）`[Qoder]`
