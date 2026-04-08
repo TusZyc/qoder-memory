@@ -186,9 +186,41 @@
 
 ---
 
+## 🔵 装配模拟器（新功能，待开发）
+
+**状态**: 🔵 技术调研完成，待开始开发
+**优先级**: 最高
+**技术文档**: `knowledge/fitting-simulator-spec.md`
+
+### 阶段一（MVP）- 待开始
+- [ ] SDE 数据导入命令 (`php artisan fitting:import-sde`)
+- [ ] 国服 ESI 校正命令 (`php artisan fitting:sync-serenity`)
+- [ ] `FittingDataService`：舰船/装备数据查询服务
+- [ ] `/api/fitting/ships`：舰船列表 API
+- [ ] `/api/fitting/types/{id}`：物品属性+效果 API
+- [ ] `/api/fitting/search`：装备搜索 API
+- [ ] 装配页面 Blade 模板（舰船选择器 + 槽位面板 + 属性面板）
+- [ ] Alpine.js 装配交互（拖拽/点击装备入槽）
+- [ ] 基础资源检查（CPU/电网/槽位/校准值）
+
+### 阶段二 - 待阶段一完成
+- [ ] 前端 Dogma 计算引擎（fitting.js）
+- [ ] 9步操作链 + 堆叠惩罚实现
+- [ ] 修正后属性实时显示
+- [ ] EHP 计算
+
+### 阶段三 - 待阶段二完成
+- [ ] 技能加成、弹药/脚本、DPS计算、电容稳定性
+- [ ] 装配保存/分享
+- [ ] EFT 格式导入导出
+- [ ] 价格估算
+
+---
+
 ## 待办队列
 
 ### 最高优先级
+- [ ] **开始装配模拟器阶段一开发** `[待分配]`
 - [ ] 部署 Qoder 的最新代码（`32f4cc3`）到服务器 `[待操作]`
 - [ ] 修复通知接口 `ESI request failed for universe/names` 错误 `[待分配]`
 

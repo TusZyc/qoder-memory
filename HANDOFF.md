@@ -3,7 +3,7 @@
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
 **最后更新**: 2026-04-08
-**更新者**: [Claude Code - 合并冲突]
+**更新者**: [Claude Code]
 **当前设备**: Aliyun ECS + 本地开发
 
 ---
@@ -12,6 +12,7 @@
 
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
+| **装配模拟器** | 🔵 技术调研完成，待开始开发 | 最高 | [待分配] |
 | KM 图片生成器 | ✅ 功能完整，代码重构为 KillmailImageRenderer | 高 | [Qoder] |
 | 战场报告功能 | ✅ 框架完成（阵营预览、ISK 千位分隔、KM 弹窗） | 高 | [Qoder] |
 | P0代码优化 | ✅ 已完成（TokenService + StationNameService） | 最高 | [Qoder] |
@@ -134,7 +135,20 @@ rm -f storage/app/km-images/km_hull_price_*.json
 
 ## 下一步计划
 
-1. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
-2. 验证战场报告功能和 KM 图片生成
-3. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
-4. 继续修复代码审查剩余问题（详见 `knowledge/code-review.md`）
+1. **开始装配模拟器开发**（技术文档已在 `knowledge/fitting-simulator-spec.md`）
+2. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
+3. 验证战场报告功能和 KM 图片生成
+4. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
+
+---
+
+## 装配模拟器快速参考
+
+**技术文档**：`knowledge/fitting-simulator-spec.md`（完整规格，包含架构/数据库/API设计/代码示例）
+
+**核心要点**：
+- 数据来源：欧服 SDE（Fuzzwork MySQL dump）+ 国服 ESI 属性值校正
+- Dogma 引擎：前端 JS 实现（可升级为 WASM），9 步操作链 + 堆叠惩罚
+- 开源参考：EVEShipFit/dogma-engine（Rust/WASM），Pyfa/eos（Python）
+- 抗性注意：SDE 存储共振值，转换：`抗性% = (1 - 共振值) × 100`
+- 三阶段开发：①基础装配界面 → ②Dogma引擎 → ③完整功能
