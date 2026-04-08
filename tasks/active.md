@@ -1,21 +1,19 @@
 # 进行中的任务
 
-<<<<<<< HEAD
-**最后更新**: 2026-04-02 23:35
-**更新者**: [Qoder]
-=======
-**最后更新**: 2026-04-05
-**更新者**: [Claude Code]
+**最后更新**: 2026-04-08
+**更新者**: [Claude Code - 合并冲突]
 
 ---
 
-## ✅ KM 图片生成器（功能完整，持续优化）
+## ✅ KM 图片生成器（功能完整，代码重构完成）
 
-**状态**: ✅ 功能完整，已经过多轮布局优化
-**最新 commit**: `e3aec36`
+**状态**: ✅ 功能完整，代码架构优化完成
+**最新 commit**: `32f4cc3` (战场报告功能优化修复)
 
 ### 已完成
-- [x] `KillmailImageService.php`：服务端 PHP GD 图片生成
+- [x] `KillmailImageRenderer.php`：GD 图片绘制服务
+- [x] `KillmailEnrichService.php`：数据丰富化服务
+- [x] `KillmailFilterService.php`：数据筛选服务
 - [x] 国服图片接口 `https://image.evepc.163.com/`
 - [x] 头像与舰船渲染同尺寸（160px）
 - [x] 角色名白色，军团/联盟图标并排（40px），名称在图标右侧
@@ -33,8 +31,32 @@
 - [x] `KillmailService` 新增 `constellation_name`/`supporter_count`/`victim.position`
 - [x] `/killmails` 页面 KM 图片弹窗（appended to body，z-index=9999）
 
-### 待优化（用户反馈驱动）
-- [ ] 布局细节继续调整
+### 待优化
+- [ ] 部署到服务器（需同步 Docker 配置、新字体、新服务）
+
+---
+
+## ✅ 战场报告功能（框架完成）
+
+**状态**: ✅ 基础功能完成，待服务器验证
+**优先级**: 高
+**负责**: [Qoder]
+**commit**: `4034842` & `32f4cc3`
+
+### 已完成
+- [x] `BattleReportController.php` — 页面和 API 控制器
+- [x] `BattleReportService.php` (515 行) — 战场数据聚合
+- [x] `resources/views/battlereport/index.blade.php` (871 行) — 前端展示
+- [x] 搜索星系 KM 历史（指定时间范围）
+- [x] 阵营预览（蓝队 vs 红队对称布局）
+- [x] ISK 千位分隔符格式化
+- [x] KM 详情弹窗（从战报中查看单个 KM）
+- [x] 击杀数统计
+- [x] 物品获取统计
+
+### 待办
+- [ ] 服务器部署验证
+- [ ] 性能测试（大时间跨度数据量）
 
 ---
 
@@ -45,9 +67,8 @@
 
 - [x] Swap 扩容至 2GB（持久化）
 - [x] Docker 镜像重建（GD + FreeType + JPEG + WebP）
-- [x] 字体文件修复（WQY ZenHei 17MB 真字体替换假 HTML 文件）
+- [x] 字体文件修复（WQY ZenHei → Noto Sans SC）
 - [x] 验证 GD FreeType: `FreeType Support: 1`
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
 
 ---
 
@@ -76,6 +97,24 @@
 | 钱包页面 `/wallet` | Token查询7次 | Token查询1次 |
 | 邮件页面 `/mail` | Token查询5次 | Token查询1次 |
 | 技能页面 `/skills` | Token查询3次 + 逐个查询 | Token查询1次 + 批量查询 |
+
+---
+
+## ✅ /notifications 目录权限修复（已完成）
+
+**状态**: ✅ 已完成
+**优先级**: 高
+**负责**: [Claude Code]
+
+### 问题
+- 500 错误：View [notifications.index] not found
+- 根本原因：`drwx---rwx` 目录权限，group 无读取权限
+- PHP-FPM 容器内无法访问
+
+### 解决
+- [x] 执行 `chmod 755 /opt/eve-esi/resources/views/notifications/`
+- [x] 执行 `docker exec eve-esi-app php artisan view:clear`
+- [x] 验证通过：`docker exec eve-esi-app ls /var/www/html/resources/views/notifications/`
 
 ---
 
@@ -149,19 +188,17 @@
 
 ## 待办队列
 
-### 高优先级
+### 最高优先级
+- [ ] 部署 Qoder 的最新代码（`32f4cc3`）到服务器 `[待操作]`
 - [ ] 修复通知接口 `ESI request failed for universe/names` 错误 `[待分配]`
-- [ ] 修复代码审查剩余严重问题（见上方清单）`[Claude Code]`
-- [ ] 验证市场搜索功能 `[Qoder]`
+
+### 高优先级
+- [ ] 继续修复代码审查严重问题（OAuth/CDN/视频压缩/Token加密） `[Claude Code]`
+- [ ] 验证战场报告功能 `[待分配]`
 
 ### 中优先级
-<<<<<<< HEAD
-- [ ] 修复代码审查中等问题 `[Claude Code]`
-- [ ] 测试后台管理缓存功能 `[待分配]`
-- [ ] Redis 缓存预热优化 `[待分配]`
-=======
 - [ ] 手机端响应式布局 `[Claude Code]`
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
+- [ ] 修复代码审查高危问题（权限检查/脱敏等） `[Claude Code]`
 
 ### 低优先级
 - [ ] CacheKeyService 统一使用
@@ -171,7 +208,22 @@
 
 ## 历史任务归档
 
-<<<<<<< HEAD
+### 2026-04-08 完成
+- [x] /notifications 目录权限修复 (chmod 755) `[Claude Code]`
+- [x] 合并两个 AI 的记忆冲突（HANDOFF.md/tasks/active.md） `[Claude Code]`
+
+### 2026-04-06 完成
+- [x] **KM 图片生成器架构重构**: 拆分为 ImageRenderer/EnrichService/FilterService `[Qoder]`
+- [x] **战场报告功能完成**: BattleReportController/Service/View(871行) `[Qoder]`
+- [x] **字体升级**: WQY ZenHei → Noto Sans SC `[Qoder]`
+
+### 2026-04-05 完成
+- [x] **KM图片生成器多轮优化**: 11项布局大改 + 视觉细节 + 数据修复 + 船体价格 `[Claude Code]` commits: `c3adbbc` `bc72a51` `4693124` `26bb20b` `e3aec36`
+- [x] **服务器OOM恢复**: Swap 2GB + Docker 重建 + 字体修复 `[Claude Code]`
+
+### 2026-04-04 完成
+- [x] **KM图片生成器**: 完整实现 `[Claude Code]` commit: `4bc5e05`
+
 ### 2026-04-02 完成
 - [x] **P0代码优化**: TokenService统一服务 + StationNameService重构（+1118/-382行）`[Qoder]`
 - [x] 部署 `2c6f586` 到服务器（15个文件）`[Qoder]`
@@ -181,15 +233,6 @@
 ### 2026-04-01 完成
 - [x] 全面代码审查 `[Claude Code]`
 - [x] GitHub 同步（4个虫洞优化文件）`[Qoder]`
-=======
-### 2026-04-05 完成
-- [x] **KM图片生成器多轮优化**: 11项布局大改 + 视觉细节 + 数据修复 + 船体价格 `[Claude Code]` commits: `c3adbbc` `bc72a51` `4693124` `26bb20b` `e3aec36`
-- [x] **服务器OOM恢复**: Swap 2GB + Docker 重建 + 字体修复 `[Claude Code]`
-- [x] **KM图片布局初版优化**: 国服接口 + 军团联盟上下排 + 物品名白色 `[Claude Code]` commit: `8b81605`
-
-### 2026-04-04 完成
-- [x] **KM图片生成器**: 完整实现 `[Claude Code]` commit: `4bc5e05`
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
 
 ### 2026-03-25 ~ 3-28 完成
 - [x] 虫洞查询功能完整开发 `[Qoder]`

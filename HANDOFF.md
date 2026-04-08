@@ -2,9 +2,9 @@
 
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
-**最后更新**: 2026-04-02 23:35
-**更新者**: [Qoder]
-**当前设备**: 家里电脑
+**最后更新**: 2026-04-08
+**更新者**: [Claude Code - 合并冲突]
+**当前设备**: Aliyun ECS + 本地开发
 
 ---
 
@@ -12,14 +12,11 @@
 
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
-<<<<<<< HEAD
-| P0代码优化 | ✅ 已完成 | 最高 | [Qoder] |
+| KM 图片生成器 | ✅ 功能完整，代码重构为 KillmailImageRenderer | 高 | [Qoder] |
+| 战场报告功能 | ✅ 框架完成（阵营预览、ISK 千位分隔、KM 弹窗） | 高 | [Qoder] |
+| P0代码优化 | ✅ 已完成（TokenService + StationNameService） | 最高 | [Qoder] |
 | 修复通知接口 ESI universe/names 错误 | 🔄 待修复 | 高 | [待分配] |
-=======
-| KM 图片生成器开发 | ✅ 功能完整，布局多轮优化完成 | 高 | [Claude Code] |
-| 服务器 Docker 重建（OOM后恢复） | ✅ 已完成 | 最高 | [Qoder/Claude Code] |
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
-| 验证市场搜索功能 | ⏳ 待验证 | 中 | [待分配] |
+| /notifications 目录权限错误 | ✅ 已修复（chmod 755） | 高 | [Claude Code] |
 
 详细任务清单见 `tasks/active.md`
 
@@ -27,27 +24,15 @@
 
 ## 最近进展
 
-<<<<<<< HEAD
-| 日期 | 内容 | 操作者 |
-|------|------|--------|
-| 4-02 | **P0优化完成**: TokenService统一服务 + StationNameService重构，减少80%重复查询 | [Qoder] |
-| 4-02 | 部署 `2c6f586` 到服务器（15个文件） | [Qoder] |
-| 4-02 | 部署 `3e6a96a` 到服务器（git pull + 缓存清理） | [Qoder] |
-| 4-02 | 全面修复：Token缓存闭包/通知summary端点/星空动画/CSRF/datasource/Redis锁 | [Claude Code] |
-| 4-01 | 全面代码审查：发现6个严重、8个高危、10个中等问题 | [Claude Code] |
-| 4-01 | 建立多AI协作记忆规范 | [Claude Code] |
-=======
 | 日期 | 内容 | commit | 操作者 |
 |------|------|--------|--------|
-| 4-05 | 总价值加入船体价格 | `e3aec36` | [Claude Code] |
-| 4-05 | 船体价格修复为国服 ESI 端点（ali-esi.evepc.163.com） | `26bb20b` | [Claude Code] |
-| 4-05 | 8项视觉优化：统计栏黑背景/去左侧色条/行距加大/颜色调整 | `4693124` | [Claude Code] |
-| 4-05 | supporters/position字段修复：正确解析官方ESI数据 | `bc72a51` | [Claude Code] |
-| 4-05 | KM图片11项布局大改（头像160/船体价格/位置格式/宽参与者栏等） | `c3adbbc` | [Claude Code] |
-| 4-05 | KM图片布局优化：国服接口/军团联盟上下排/物品名白色 | `8b81605` | [Claude Code] |
-| 4-05 | 服务器 OOM 恢复：Swap 2GB + Docker 重建 + 字体修复 | — | [Claude Code] |
-| 4-03 | UI修复：页面标题/合同NaN/服务器维护检测/装配搜索 | `cde8d06` | [Claude Code] |
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
+| 4-08 | /notifications 目录权限修复（drwx---rwx → 755） | — | [Claude Code] |
+| 4-06 | KM 图片生成器大重构：拆分为 ImageRenderer/EnrichService/FilterService | `32f4cc3` | [Qoder] |
+| 4-06 | 战场报告功能完成：BattleReportController/Service/View(871行) | `4034842` | [Qoder] |
+| 4-06 | 字体升级：WQY ZenHei → Noto Sans SC | `32f4cc3` | [Qoder] |
+| 4-05 | 总价值加入船体价格，多轮 KM 图片优化完成 | `e3aec36` | [Claude Code] |
+| 4-02 | P0优化完成：TokenService 统一服务 + StationNameService 重构 | `2c6f586` | [Qoder] |
+| 4-01 | 全面代码审查（6严重/8高危/10中等） | — | [Claude Code] |
 
 ---
 
@@ -55,25 +40,21 @@
 
 | 项目 | 值 |
 |------|-----|
-<<<<<<< HEAD
-| 最后部署 | 2026-04-02 23:30 [Qoder] |
-| 最后commit | `2c6f586` (refactor: 解决P0问题 - TokenService统一服务与空间站名称服务重构) |
-| 待部署变更 | 无 |
-| Docker容器 | eve-esi-app / eve-esi-nginx / eve-esi-redis ✅ 运行中 |
-| HTTPS证书 | ZeroSSL，90天，每日14:01自动续期 |
-| GitHub同步 | ✅ 已同步至 `2c6f586` |
-=======
 | 最后成功部署 | 2026-04-05 [Claude Code via SSH] |
-| 服务器当前 commit | `e3aec36` |
-| Docker容器 | ✅ 正常运行（含 GD FreeType 支持） |
+| 服务器当前 commit | `e3aec36`（待部署 Qoder 的 `32f4cc3`） |
+| Docker 容器 | ✅ 正常运行（含 GD FreeType 支持、Noto Sans SC 字体） |
 | Swap | 2GB（已持久化） |
-| HTTPS证书 | ZeroSSL，90天，每日14:01自动续期 |
+| HTTPS 证书 | ZeroSSL，90天，每日 14:01 自动续期 |
+| /notifications 目录权限 | ✅ 已修复为 755 |
 
 ---
 
 ## KM 图片生成器技术要点
 
-**文件**: `app/Services/Killmail/KillmailImageService.php`
+**文件**:
+- `app/Services/Killmail/KillmailImageRenderer.php` — GD 图片绘制
+- `app/Services/Killmail/KillmailEnrichService.php` — 数据丰富化
+- `app/Services/Killmail/KillmailFilterService.php` — 数据筛选
 
 **路由**: `GET /api/killmails/kill/{killId}/image?force=1`
 
@@ -93,7 +74,30 @@
 - `constellation_name` 和 `victim.position` 已加入 KillmailService 返回数据
 - 物品总价值 = 装备价值 + 船体最低卖单
 
-**字体**: WQY ZenHei（`storage/fonts/NotoSansSC-Regular/Bold.ttf`，实为 .ttc）
+**字体**: Noto Sans SC (`storage/fonts/NotoSansSC-Regular.ttf` / `NotoSansSC-Bold.ttf`)
+
+---
+
+## 战场报告功能
+
+**文件**:
+- `app/Http/Controllers/Api/BattleReportController.php`
+- `app/Services/BattleReport/BattleReportService.php` (515 行)
+- `resources/views/battlereport/index.blade.php` (871 行)
+
+**功能**:
+- 搜索星系 KM 历史（指定时间范围）
+- 阵营预览（蓝队 vs 红队）
+- ISK 千位分隔符格式化
+- KM 详情弹窗
+- 击杀数统计
+- 物品获取统计
+
+**路由**:
+```
+GET  /battlereport
+POST /api/battlereport/search (需验证参数：system_id, start_time, end_time, include_nearby)
+```
 
 ---
 
@@ -109,7 +113,6 @@ rm -f storage/app/km-images/img_corporations_*.png
 # 清除船体价格缓存
 rm -f storage/app/km-images/km_hull_price_*.json
 ```
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
 
 ---
 
@@ -118,27 +121,20 @@ rm -f storage/app/km-images/km_hull_price_*.json
 1. **PHP 静态变量缓存**：修改 PHP 代码后需 `docker restart eve-esi-app` 才能生效
 2. **Redis 缓存清空后**：市场搜索可能超时，已改为优先从静态文件加载
 3. **数据文件保护**：`data/*.json` 不能删除，提交前用 git status 检查
-<<<<<<< HEAD
-4. **虫洞行星类型**：使用 `/universe/types/{type_id}/?language=zh` 获取中文名，已缓存30天
-5. **Token缓存闭包**：`Cache::remember` 闭包必须在内部获取最新Token，不可在外部获取后传入
-6. **ESI datasource**：国服ESI所有调用必须带 `datasource=serenity`
-7. **海外SSH受限**：从海外网络连不上服务器（阿里云安全组限制），需从中国大陆网络操作
-8. **多AI协作**：[Claude Code] 负责代码审查与修复（走GitHub），[Qoder] 负责部署与服务器操作
-=======
 4. **Token缓存闭包**：`Cache::remember` 闭包必须在内部获取最新Token，不可在外部获取后传入
 5. **ESI datasource**：国服ESI所有调用必须带 `datasource=serenity`，且用 `ali-esi.evepc.163.com`
 6. **海外SSH受限**：从海外网络连不上服务器（阿里云安全组限制），需从中国大陆网络操作
 7. **多AI协作**：[Claude Code] 负责代码审查与修复（走GitHub），[Qoder] 负责部署与服务器操作
 8. **Docker build 内存**：服务器已加 2GB swap，编译 PHP 扩展不再 OOM
-9. **PHP GD 命名空间**：GD函数在命名空间类中必须用 `use function imagettftext;` 等显式导入
+9. **PHP GD 命名空间**：GD 函数在命名空间类中必须用 `use function imagettftext;` 等显式导入
 10. **括号宽度测量**：用合并字符串测宽（`$this->tw($str . '（')`），不要逐字符累加，否则会重叠
->>>>>>> 031a0ce0a0d2050b1f9daba51dc8dbadbc3f76ef
+11. **字体文件位置**：Noto Sans SC 位置为 `storage/fonts/NotoSansSC-Regular.ttf`（非 WQY ZenHei）
 
 ---
 
 ## 下一步计划
 
-1. 验证P0优化效果（钱包/资产/市场页面性能）
-2. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
-3. 测试后台管理缓存功能
+1. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
+2. 验证战场报告功能和 KM 图片生成
+3. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
 4. 继续修复代码审查剩余问题（详见 `knowledge/code-review.md`）
