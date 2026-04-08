@@ -52,6 +52,16 @@ ESI `universe/stations/{id}` 不支持 `language=zh`，需要 6 步翻译：
 | EVE 颜色格式 ARGB | CSS 需 RGB，用 `substr($color, 2)` 去掉 alpha |
 | 合同 API | 仅返回 30 天内或未完成的合同 |
 
+### 装配模拟器 modifiers 为空（2026-04-09 Codex 发现）
+**问题**：`/fitting-simulator` 页面已接入 `fitting.sqlite`，但很多模块的 `effects.modifiers` 为空数组，导致前端无法直接做完整 Dogma 计算。  
+**现象**：
+- `Damage Control II` 的 `damageControl` effect 存在，但 `modifiers: []`
+- `Large Shield Extender II`、`1MN Afterburner II`、`1600mm Steel Plates II` 等也是 effect 名称存在、modifier 为空
+**影响**：当前可做基础资源检查和部分启发式属性联动，但不能依赖 effect tree 实现完整 9 步计算链。  
+**后续方向**：
+- 先检查 `ImportFittingSde` 的 `modifierInfo -> modifiers_json` 解析链是否漏掉了复杂 YAML
+- 若导入链没问题，再检查源 SDE 字段格式是否与当前简单 parser 不兼容
+
 ---
 
 ## 部署与缓存

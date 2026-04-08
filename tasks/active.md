@@ -1,7 +1,7 @@
 # 进行中的任务
 
-**最后更新**: 2026-04-08
-**更新者**: [Claude Code - 合并冲突]
+**最后更新**: 2026-04-09
+**更新者**: [Codex]
 
 ---
 
@@ -188,20 +188,21 @@
 
 ## 🔵 装配模拟器（新功能，待开发）
 
-**状态**: 🔵 技术调研完成，待开始开发
+**状态**: 🔄 已确认线上 MVP，基础属性联动开发中
 **优先级**: 最高
 **技术文档**: `knowledge/fitting-simulator-spec.md`
 
 ### 阶段一（MVP）- 待开始
-- [ ] SDE 数据导入命令 (`php artisan fitting:import-sde`)
+- [x] 已确认服务器存在 `/fitting-simulator` 页面与公开 API `[Codex] 2026-04-09`
+- [x] 已确认 `database/fitting.sqlite` 已初始化并被页面使用 `[Codex] 2026-04-09`
+- [x] 已确认装配页面已有基础资源检查（CPU/电网/槽位/校准值/硬点） `[Codex] 2026-04-09`
+- [x] 开始补前端基础属性联动（护盾/装甲/速度/信号半径/常见抗性） `[Codex] 2026-04-09`
+- [x] 修复舰船势力分类展开时加载慢/空白问题 `[Codex] 2026-04-09`
+- [x] 修复装备安装时误报“该槽位已满” `[Codex] 2026-04-09`
+- [ ] 验证基础属性联动在服务器页面上的实际表现 `[Codex] 2026-04-09`
+- [ ] 排查 `effects.modifiers` 为空的根因，决定是重导入还是增强解析 `[Codex] 2026-04-09`
 - [ ] 国服 ESI 校正命令 (`php artisan fitting:sync-serenity`)
-- [ ] `FittingDataService`：舰船/装备数据查询服务
-- [ ] `/api/fitting/ships`：舰船列表 API
-- [ ] `/api/fitting/types/{id}`：物品属性+效果 API
-- [ ] `/api/fitting/search`：装备搜索 API
-- [ ] 装配页面 Blade 模板（舰船选择器 + 槽位面板 + 属性面板）
-- [ ] Alpine.js 装配交互（拖拽/点击装备入槽）
-- [ ] 基础资源检查（CPU/电网/槽位/校准值）
+- [ ] 完整 Dogma 计算所需 modifiers 数据恢复
 
 ### 阶段二 - 待阶段一完成
 - [ ] 前端 Dogma 计算引擎（fitting.js）
@@ -243,6 +244,10 @@
 ### 2026-04-08 完成
 - [x] /notifications 目录权限修复 (chmod 755) `[Claude Code]`
 - [x] 合并两个 AI 的记忆冲突（HANDOFF.md/tasks/active.md） `[Claude Code]`
+
+### 2026-04-09 完成
+- [x] 接手装配模拟器上下文，确认线上已部署 MVP 页面与接口 `[Codex]`
+- [x] 确认当前装配页缺口在实时属性计算，不在基础 UI/数据查询 `[Codex]`
 
 ### 2026-04-06 完成
 - [x] **KM 图片生成器架构重构**: 拆分为 ImageRenderer/EnrichService/FilterService `[Qoder]`

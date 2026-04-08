@@ -2,8 +2,8 @@
 
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
-**最后更新**: 2026-04-08
-**更新者**: [Claude Code]
+**最后更新**: 2026-04-09
+**更新者**: [Codex]
 **当前设备**: Aliyun ECS + 本地开发
 
 ---
@@ -12,7 +12,7 @@
 
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
-| **装配模拟器** | 🔵 技术调研完成，待开始开发 | 最高 | [待分配] |
+| **装配模拟器** | 🔄 已确认线上 MVP 现状，基础属性联动开发中 | 最高 | [Codex] |
 | KM 图片生成器 | ✅ 功能完整，代码重构为 KillmailImageRenderer | 高 | [Qoder] |
 | 战场报告功能 | ✅ 框架完成（阵营预览、ISK 千位分隔、KM 弹窗） | 高 | [Qoder] |
 | P0代码优化 | ✅ 已完成（TokenService + StationNameService） | 最高 | [Qoder] |
@@ -27,6 +27,8 @@
 
 | 日期 | 内容 | commit | 操作者 |
 |------|------|--------|--------|
+| 4-09 | 装配模拟器：修复舰船势力分类展开慢/空白，修复装备安装误报“该槽位已满” | — | [Codex] |
+| 4-09 | 装配模拟器：确认 `/fitting-simulator` 已部署 MVP，前端开始补基础属性实时联动 | — | [Codex] |
 | 4-08 | /notifications 目录权限修复（drwx---rwx → 755） | — | [Claude Code] |
 | 4-06 | KM 图片生成器大重构：拆分为 ImageRenderer/EnrichService/FilterService | `32f4cc3` | [Qoder] |
 | 4-06 | 战场报告功能完成：BattleReportController/Service/View(871行) | `4034842` | [Qoder] |
@@ -135,9 +137,9 @@ rm -f storage/app/km-images/km_hull_price_*.json
 
 ## 下一步计划
 
-1. **开始装配模拟器开发**（技术文档已在 `knowledge/fitting-simulator-spec.md`）
-2. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
-3. 验证战场报告功能和 KM 图片生成
+1. **继续装配模拟器开发**：验证前端基础属性联动，补更多常见模块规则 `[Codex] 2026-04-09`
+2. 排查 `fitting.sqlite` 中大量 `effects.modifiers` 为空的问题，决定是重导入还是增强解析 `[Codex] 2026-04-09`
+3. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
 4. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
 
 ---
@@ -152,3 +154,6 @@ rm -f storage/app/km-images/km_hull_price_*.json
 - 开源参考：EVEShipFit/dogma-engine（Rust/WASM），Pyfa/eos（Python）
 - 抗性注意：SDE 存储共振值，转换：`抗性% = (1 - 共振值) × 100`
 - 三阶段开发：①基础装配界面 → ②Dogma引擎 → ③完整功能
+
+> [Codex] 2026-04-09：已确认服务器 `/fitting-simulator` 不是空白页，而是“公开页面 + SDE 查询 API + 基础资源检查”的 MVP。
+> [Codex] 2026-04-09：当前主要缺口不是 UI，而是 `fitting.sqlite` 中大量模块 `effects.modifiers` 为空，暂时无法直接实现完整 Dogma。
