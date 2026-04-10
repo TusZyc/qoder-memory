@@ -2,8 +2,8 @@
 
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
-**最后更新**: 2026-04-09
-**更新者**: [Codex]
+**最后更新**: 2026-04-10
+**更新者**: [Claude Code]
 **当前设备**: Aliyun ECS + 本地开发
 
 ---
@@ -13,6 +13,7 @@
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
 | **装配模拟器** | 🔄 已确认线上 MVP 现状，基础属性联动开发中 | 最高 | [Codex] |
+| **SDE-First 静态数据架构** | 📋 方案设计完成，待 Tus 拍板 D1-D8 决策项后启动 Phase 0 | 高（长期） | [待分配] |
 | KM 图片生成器 | ✅ 功能完整，代码重构为 KillmailImageRenderer | 高 | [Qoder] |
 | 战场报告功能 | ✅ 框架完成（阵营预览、ISK 千位分隔、KM 弹窗） | 高 | [Qoder] |
 | P0代码优化 | ✅ 已完成（TokenService + StationNameService） | 最高 | [Qoder] |
@@ -27,6 +28,8 @@
 
 | 日期 | 内容 | commit | 操作者 |
 |------|------|--------|--------|
+| 4-10 | 服务器与 GitHub 同步：将服务器工作区 6 个未提交文件合入 main，备份 Qoder 11 个 commit 到 backup 分支 | `daa3c2d` | [Claude Code] |
+| 4-10 | SDE-First 架构方案文档：扩展 Qoder 的 sde-data-architecture.md 为完整迁移方案 `knowledge/sde-first-architecture.md` | — | [Claude Code] |
 | 4-09 | 装配模拟器：修复舰船势力分类展开慢/空白，修复装备安装误报“该槽位已满” | — | [Codex] |
 | 4-09 | 装配模拟器：确认 `/fitting-simulator` 已部署 MVP，前端开始补基础属性实时联动 | — | [Codex] |
 | 4-08 | /notifications 目录权限修复（drwx---rwx → 755） | — | [Claude Code] |
@@ -44,7 +47,7 @@
 | 项目 | 值 |
 |------|-----|
 | 最后成功部署 | 2026-04-05 [Claude Code via SSH] |
-| 服务器当前 commit | `e3aec36`（待部署 Qoder 的 `32f4cc3`） |
+| 服务器当前 commit | `daa3c2d` (2026-04-10 [Claude Code] 同步) |
 | Docker 容器 | ✅ 正常运行（含 GD FreeType 支持、Noto Sans SC 字体） |
 | Swap | 2GB（已持久化） |
 | HTTPS 证书 | ZeroSSL，90天，每日 14:01 自动续期 |
@@ -138,9 +141,16 @@ rm -f storage/app/km-images/km_hull_price_*.json
 ## 下一步计划
 
 1. **继续装配模拟器开发**：验证前端基础属性联动，补更多常见模块规则 `[Codex] 2026-04-09`
+   > [Tus] 2026-04-10 通过 [Claude Code] 反馈：装配模拟器一稿质量较差，可能整体重做，详见 ideas 或后续讨论
 2. 排查 `fitting.sqlite` 中大量 `effects.modifiers` 为空的问题，决定是重导入还是增强解析 `[Codex] 2026-04-09`
 3. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
+   > [Claude Code] 2026-04-10 更正：服务器已同步至 `daa3c2d`（包含 32f4cc3 + 后续 Qoder 工作 + 服务器未提交改动），此项已完成
 4. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
+   > [Claude Code] 2026-04-10：此问题在 SDE-First 改造的 Phase 2 后会自然消失（universe/names 改走 static.sqlite）
+5. **SDE-First 静态数据架构改造**（长期，分 4 Phase） `[Claude Code] 2026-04-10`
+   - 方案文档：`knowledge/sde-first-architecture.md`
+   - 待 Tus 拍板 §9 决策清单（D1-D8）
+   - Phase 0 预计 1-2 天，整体周期长，慢工出细活
 
 ---
 
