@@ -169,3 +169,20 @@ rm -f storage/app/km-images/km_hull_price_*.json
 
 > [Codex] 2026-04-09：已确认服务器 `/fitting-simulator` 不是空白页，而是“公开页面 + SDE 查询 API + 基础资源检查”的 MVP。
 > [Codex] 2026-04-09：当前主要缺口不是 UI，而是 `fitting.sqlite` 中大量模块 `effects.modifiers` 为空，暂时无法直接实现完整 Dogma。
+---
+
+## 2026-04-10 Codex 补充
+
+- `/fitting-simulator` 的新分类树第一版上线后，线上出现了 `500` 和 30 秒超时。
+- 根因不是数据文件坏了，而是新接口在请求时逐个扫描数据库、逐个查属性，现场拼树太重。
+- 已改成：
+  - 舰船分类优先使用本地 `data/eve_items.json` 的中文分类路径
+  - 装备分类优先使用本地 `data/eve_items.json`，槽位不够明确时再用 effect 兜底
+  - 先缓存整理好的目录，再按用户点到的最后一级分类去取具体船/装备
+- 舰船分类展示现在会去掉顶层“舰船”，从“护卫舰 / 巡洋舰 / 工业与运载舰 ...”开始展开，更接近游戏内查找习惯。
+- 装备分类树和装备列表现在会带槽位过滤，避免“左边看着是低槽，点进去混出别的槽位装备”。
+- 图片链路改为直接使用 `https://image.evepc.163.com/Type/{typeId}_{size}.png`，不再走服务器中转，目的是让舰船/装备图标更准，也减少缺图点。
+- 主项目本轮提交：
+  - `004dbd1` `fix: speed up fitting category trees`
+  - `fee96c7` `fix: use direct fitting image urls`
+- 两个提交都已 push 到 GitHub，并已部署到服务器。
