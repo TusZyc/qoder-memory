@@ -186,3 +186,23 @@ rm -f storage/app/km-images/km_hull_price_*.json
   - `004dbd1` `fix: speed up fitting category trees`
   - `fee96c7` `fix: use direct fitting image urls`
 - 两个提交都已 push 到 GitHub，并已部署到服务器。
+
+### 同日后续补充
+
+- Tus 新确认：
+  - 舰船和装备都希望“最后一级分类点开后，具体物品就挂在这个分类下面”
+  - 装配区舰船图应用 `Render`，小图标继续可用 `Type`
+  - 装备分类树的最终样式先不要继续大改，先调研游戏内真实分类方式
+- 已追加处理：
+  - 舰船树和装备树都改为内联展开最后一级物品
+  - 舰船接口补充 `render_url`
+  - 装配区舰船图优先显示 `render_url`
+- 图片文档核对：
+  - `Type/{typeID}_{width}.png`
+  - `Render/{typeID}_{width}.png`
+  - 文档页列出的常见尺寸有 `512/256/128/64/32`
+- 本轮新增主项目提交：
+  - `0162624` `fix: inline fitting tree item lists`
+- 服务器在本轮部署时一度无法连接 GitHub，因此：
+  - GitHub 已成功 push
+  - 服务器是用 `scp` 直接覆盖文件 + 清缓存 + 重启容器完成部署
