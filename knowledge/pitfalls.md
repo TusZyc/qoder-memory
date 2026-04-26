@@ -17,8 +17,8 @@
 
 ## ESI API 陷阱
 
-### KB 新版 KM 详情 hash 获取（2026-04-26 Codex 发现）
-**问题**：KB 更新后，搜索/列表接口仍可用，但点击 KM 详情时无法再通过普通 HTTP 获取 ESI hash，导致 `/api/killmails/kill/{id}` 只能走旧 KB HTML fallback，而新 KM 旧页经常返回“世界线已发生混乱”。
+### KB 新版 KM 详情 hash 获取（2026-04-26 Codex）
+**问题**：KB 更新后，搜索/列表接口仍可用，但点击 KM 详情时无法再通过普通 HTTP 获取 ESI hash，导致 `/api/killmails/kill/{id}` 无法继续走官方 ESI 详情链路。
 
 **确认结果**：
 - `https://beta.ceve-market.org/kill/{id}` 静态 HTML 不包含 `api认证`、`ali-esi` 或 `killmails/{id}/{hash}`。
@@ -35,15 +35,19 @@
 6. `POST /app/Steins;Gate`，body 是 protobuf `{ question: "", answer }`。
 7. 再请求 `/app/kill/{id}/info`，解 protobuf 后才能拿到 `km.Hash`。
 
-**实验状态**：
-- 已验证 `el_psy_congroo` 可返回 `question + difficulty`。
-- 已验证本地 Node 可以加载 KB WASM，并算出 gate answer。
-- 临时手写 Node wasm-bindgen glue 卡在 `externref` 兼容，需继续补齐或复用官方 glue；这不是 hash 获取原理障碍。
+**最终方案**：
+- 复用 KB 官方风格 wasm-bindgen glue，在 Node 脚本中执行完整门禁流程。
+- 关键步骤是沿用 `/app/el_psy_congroo` 后更新过的 cookies，尤其是 `ReDive` 和 `Princess.Connect`。
+- 成功后从 `/app/kill/{id}/info` protobuf 中提取 `km.Hash`，再走官方 ESI `/latest/killmails/{id}/{hash}/?datasource=serenity` 获取完整详情。
 
-**当前线上兜底**：
-- 搜索结果会按 `kill_id` 缓存摘要。
-- 详情无 hash 且旧 KB fallback 失败时，返回 `detail_unavailable=true` 的摘要详情，避免直接报“KM 不存在或页面暂时不可用”。
-- 这只是临时兜底，不满足“完整 KM 详情”目标；完整修复仍要拿到 hash 后走官方 ESI。
+**代码落地点**：
+- `scripts/kb_gate_hash.mjs`
+- `app/Services/Killmail/KbGateHashResolver.php`
+- `app/Services/KillmailService.php`
+
+**额外坑点**：
+- PHP-FPM 下 `proc_close()` 可能返回 `-1`，即使 Node 脚本 stdout 已成功输出合法 hash JSON。
+- 处理方式：优先解析 stdout，只要 hash 合法就直接视为成功并缓存，不要只盯退出码。
 
 ### 中文翻译参数支持表
 | 端点 | 支持 language=zh | 备注 |
