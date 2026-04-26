@@ -17,6 +17,34 @@
 
 ## ESI API 陷阱
 
+### KB 新版 KM 详情 hash 获取（2026-04-26 Codex 发现）
+**问题**：KB 更新后，搜索/列表接口仍可用，但点击 KM 详情时无法再通过普通 HTTP 获取 ESI hash，导致 `/api/killmails/kill/{id}` 只能走旧 KB HTML fallback，而新 KM 旧页经常返回“世界线已发生混乱”。
+
+**确认结果**：
+- `https://beta.ceve-market.org/kill/{id}` 静态 HTML 不包含 `api认证`、`ali-esi` 或 `killmails/{id}/{hash}`。
+- KB 前端会在运行后将 `km.KillID` 和 `km.Hash` 拼成官方 ESI 链接：`https://ali-esi.evepc.163.com/latest/killmails/{KillID}/{Hash}/?datasource={server}`。
+- `km.Hash` 来自 `/app/kill/{id}/info`，该接口以及 `/item`、`/fitting`、`/atk`、`/support`、`/img` 都需要先完成 KB 的 WASM PoW 门禁。
+- 仅获取 `GranblueFantasy` / `ReDive` cookies，并带 `FinalFantasy-XIV: {ReDive}` header 不够；直接请求详情接口会 403。
+
+**KB 前端门禁流程**：
+1. 加载 `/assets/KBPoWR_bg.wasm?v2`。
+2. 用 WASM `encrypt(fingerprint_json_bytes)` 生成 fp payload。
+3. `POST /app/el_psy_congroo`，body 是 protobuf `{ payload: fp }`。
+4. 返回 `question` 和 `difficulty`。
+5. 用 WASM `find_gate_async(question, difficulty, progressCb)` 算 answer。
+6. `POST /app/Steins;Gate`，body 是 protobuf `{ question: "", answer }`。
+7. 再请求 `/app/kill/{id}/info`，解 protobuf 后才能拿到 `km.Hash`。
+
+**实验状态**：
+- 已验证 `el_psy_congroo` 可返回 `question + difficulty`。
+- 已验证本地 Node 可以加载 KB WASM，并算出 gate answer。
+- 临时手写 Node wasm-bindgen glue 卡在 `externref` 兼容，需继续补齐或复用官方 glue；这不是 hash 获取原理障碍。
+
+**当前线上兜底**：
+- 搜索结果会按 `kill_id` 缓存摘要。
+- 详情无 hash 且旧 KB fallback 失败时，返回 `detail_unavailable=true` 的摘要详情，避免直接报“KM 不存在或页面暂时不可用”。
+- 这只是临时兜底，不满足“完整 KM 详情”目标；完整修复仍要拿到 hash 后走官方 ESI。
+
 ### 中文翻译参数支持表
 | 端点 | 支持 language=zh | 备注 |
 |------|-----------------|------|

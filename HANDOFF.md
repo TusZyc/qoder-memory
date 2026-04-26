@@ -2,8 +2,8 @@
 
 > 本文件是项目的实时状态。每次接手开发时，先读 README.md 了解规范，再读本文件了解现状。
 
-**最后更新**: 2026-04-10
-**更新者**: [Claude Code]
+**最后更新**: 2026-04-26
+**更新者**: [Codex]
 **当前设备**: Aliyun ECS + 本地开发
 
 ---
@@ -12,6 +12,7 @@
 
 | 任务 | 状态 | 优先级 | 负责 |
 |------|------|--------|------|
+| **KB 新版接口适配 / KM 详情恢复** | 🔄 搜索已适配新版 protobuf；详情接口被 KB PoW 门禁保护，已部署摘要兜底，完整详情需继续实现 hash 获取 | 最高 | [Codex] |
 | **装配模拟器** | 🔄 阶段1重写继续推进：分类名、装备分组、图片显示已修一轮 | 最高 | [Codex] |
 | **SDE-First 静态数据架构** | 📋 方案设计完成，待 Tus 拍板 D1-D8 决策项后启动 Phase 0 | 高（长期） | [待分配] |
 | KM 图片生成器 | ✅ 功能完整，代码重构为 KillmailImageRenderer | 高 | [Qoder] |
@@ -28,6 +29,9 @@
 
 | 日期 | 内容 | commit | 操作者 |
 |------|------|--------|--------|
+| 4-26 | KB 更新后接口适配：新版 protobuf headers/cookies、autocomplete、groups/regions/next 参数；移除前端直连 beta 详情；详情无 hash 时改为搜索摘要兜底；已部署到服务器验证 | 待同步 | [Codex] |
+| 4-26 | 确认 KB kill 详情接口 `/app/kill/{id}/info|item|fitting|atk|support|img` 已加 PoW 门禁；`api认证` 链接由前端拿到 `km.Hash` 后拼接，不在静态 HTML 中 | — | [Codex] |
+| 4-26 | 方案 2 初步验证：可调用 `/app/el_psy_congroo` 拿 question/difficulty，WASM `KBPoWR_bg.wasm` 可算 gate answer；临时 Node glue 的 externref 需补齐后才能完整提交 `/app/Steins;Gate` | — | [Codex] |
 | 4-10 | 装配模拟器：修正舰船分类名（含“战略货舰”）、装备槽位分类判断、装备列表中文分组、模块图片地址 | `01775c7` | [Codex] |
 | 4-10 | 装配模拟器阶段1重写启动：替换旧版超大前端页，改为更简单的基础可用版骨架（选船/选槽/搜索装备/装卸/资源检查） | — | [Codex] |
 | 4-10 | 服务器与 GitHub 同步：将服务器工作区 6 个未提交文件合入 main，备份 Qoder 11 个 commit 到 backup 分支 | `daa3c2d` | [Claude Code] |
@@ -48,8 +52,8 @@
 
 | 项目 | 值 |
 |------|-----|
-| 最后成功部署 | 2026-04-05 [Claude Code via SSH] |
-| 服务器当前 commit | `daa3c2d` (2026-04-10 [Claude Code] 同步) |
+| 最后成功部署 | 2026-04-26 [Codex via SCP + SSH] |
+| 服务器当前 commit | 待 GitHub 同步后更新；服务器文件已直接覆盖部署 KB 适配变更 |
 | Docker 容器 | ✅ 正常运行（含 GD FreeType 支持、Noto Sans SC 字体） |
 | Swap | 2GB（已持久化） |
 | HTTPS 证书 | ZeroSSL，90天，每日 14:01 自动续期 |
@@ -137,19 +141,22 @@ rm -f storage/app/km-images/km_hull_price_*.json
 9. **PHP GD 命名空间**：GD 函数在命名空间类中必须用 `use function imagettftext;` 等显式导入
 10. **括号宽度测量**：用合并字符串测宽（`$this->tw($str . '（')`），不要逐字符累加，否则会重叠
 11. **字体文件位置**：Noto Sans SC 位置为 `storage/fonts/NotoSansSC-Regular.ttf`（非 WQY ZenHei）
+12. **KB 新版详情门禁**：`beta.ceve-market.org/app/kill/{id}/info` 等详情接口需要浏览器先完成 WASM PoW；普通 XSRF cookie + `FinalFantasy-XIV` header 不足以访问，会返回 403。
+13. **KM hash 获取现状**：`api认证` 链接包含官方 ESI hash，但该链接由 KB 前端用 `km.Hash` 拼接，`km.Hash` 来自受门禁保护的 `/app/kill/{id}/info`，不在静态 HTML 中。
 
 ---
 
 ## 下一步计划
 
-1. **继续装配模拟器开发**：验证前端基础属性联动，补更多常见模块规则 `[Codex] 2026-04-09`
+1. **恢复 KM 完整详情**：优先继续方案 2，补齐/复用 KB WASM glue，完成 `el_psy_congroo -> find_gate_async -> Steins;Gate -> kill/info -> km.Hash -> ESI` 链路 `[Codex] 2026-04-26`
+2. **继续装配模拟器开发**：验证前端基础属性联动，补更多常见模块规则 `[Codex] 2026-04-09`
    > [Tus] 2026-04-10 通过 [Claude Code] 反馈：装配模拟器一稿质量较差，可能整体重做，详见 ideas 或后续讨论
-2. 排查 `fitting.sqlite` 中大量 `effects.modifiers` 为空的问题，决定是重导入还是增强解析 `[Codex] 2026-04-09`
-3. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
+3. 排查 `fitting.sqlite` 中大量 `effects.modifiers` 为空的问题，决定是重导入还是增强解析 `[Codex] 2026-04-09`
+4. 服务器部署 Qoder 的最新代码（`32f4cc3` — 战场报告 + KM 重构）
    > [Claude Code] 2026-04-10 更正：服务器已同步至 `daa3c2d`（包含 32f4cc3 + 后续 Qoder 工作 + 服务器未提交改动），此项已完成
-4. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
+5. 修复通知接口 `ESI request failed for universe/names` 错误（日志 ERROR）
    > [Claude Code] 2026-04-10：此问题在 SDE-First 改造的 Phase 2 后会自然消失（universe/names 改走 static.sqlite）
-5. **SDE-First 静态数据架构改造**（长期，分 4 Phase） `[Claude Code] 2026-04-10`
+6. **SDE-First 静态数据架构改造**（长期，分 4 Phase） `[Claude Code] 2026-04-10`
    - 方案文档：`knowledge/sde-first-architecture.md`
    - 待 Tus 拍板 §9 决策清单（D1-D8）
    - Phase 0 预计 1-2 天，整体周期长，慢工出细活
